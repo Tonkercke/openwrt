@@ -35,6 +35,7 @@ define Package/xray/template
   TITLE:=A platform for building proxies to bypass network restrictions
   SECTION:=net
   CATEGORY:=Network
+  SUBMENU:=Project X
   URL:=https://xtls.github.io
 endef
 
