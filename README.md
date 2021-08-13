@@ -6,7 +6,7 @@ update logs : https://openwrt.org/releases/19.07/changelog-19.07.8
 
 Compilation steps:
 
-1 
+1 Must be installed
 
 sudo apt-get -y install git build-essential asciidoc flex binutils bzip2 gawk  patch python3 python2.7 zlib1g-dev lib32gcc1 uglifyjs
   
