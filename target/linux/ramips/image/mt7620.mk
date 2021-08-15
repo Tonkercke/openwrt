@@ -274,10 +274,9 @@ endef
 TARGET_DEVICES += dlink_dwr-922-e2
 
 define Device/dm_dw22d
-  SOC := mt7620a
+  DTS := DW22D
   IMAGE_SIZE := 16064k
-  DEVICE_VENDOR := DM
-  DEVICE_MODEL := DW22D
+  DEVICE_TITLE := DM DW22D
   DEVICE_PACKAGES := kmod-mt76x0e kmod-sdhci-mt7620 kmod-usb2 kmod-usb-ohci
 endef
 TARGET_DEVICES += dm_dw22d
