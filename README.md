@@ -8,13 +8,11 @@ Compilation steps:
 
 **1 Must be installed**
 
-sudo apt-get -y install git build-essential asciidoc flex binutils bzip2 gawk  patch python3 python2.7 zlib1g-dev lib32gcc1 uglifyjs
-  
-sudo apt-get -y install grep libz-dev perl python3.6 make rsync subversion unzip libc6-dev libc6-dev-i386 gettext libncurses5-dev 
+sudo apt install -y subversion g++ zlib1g-dev build-essential git python python3 flex libz-dev  uglifyjs gcc-multilib msmtp texinfo autoconf automake libtool autopoint device-tree-compiler
 
-sudo apt-get -y install texinfo libglib2.0-dev xmlto qemu-utils libelf-dev upx autoconf automake libtool autopoint device-tree-compiler
+sudo apt install -y libncurses5-dev gawk gettext unzip file libssl-dev wget asciidoc binutils g++-multilib antlr3 gperf swig rsync
 
-sudo apt-get -y install g++-multilib libssl-dev antlr3 gperf wget curl swig msmtp gcc-multilib p7zip-full
+sudo apt install -y libelf-dev ecj fastjar java-propose-classpath bzip2 patch lib32gcc1 libc6-dev-i386 libglib2.0-dev xmlto qemu-utils upx curl
 
 
 **2 mkdir openwrt**
