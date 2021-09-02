@@ -1,4 +1,4 @@
 src-git packages https://github.com/Tonkercke/packages.git
 src-git luci https://github.com/Tonkercke/luci.git
-src-git routing https://git.openwrt.org/feed/routing.git^101632e153b41238bc19dfd96ba2d23339dbcb76
-src-git telephony https://git.openwrt.org/feed/telephony.git^affee75beff7ed8445f6bc84deff13465c331027
+src-git routing https://git.openwrt.org/feed/routing.git^c30c9ffc93702365439a7647244a052531f2e957
+src-git telephony https://git.openwrt.org/feed/telephony.git^7f73a9ad19269dcddcb7fc26e03a9823717587bb

@@ -1,8 +1,6 @@
 openwrt
 =
-Version:19.07.8
-
-update logs : https://openwrt.org/releases/19.07/changelog-19.07.8
+Version:21.02.0
 
 Compilation steps:
 

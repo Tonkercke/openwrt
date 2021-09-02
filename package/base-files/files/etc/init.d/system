@@ -27,7 +27,7 @@ system_config() {
 		&& rm -f /tmp/TZ
 
 	# apply timezone to kernel
-	date -k
+	hwclock -u --systz
 }
 
 reload_service() {
