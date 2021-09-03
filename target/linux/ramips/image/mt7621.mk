@@ -1452,10 +1452,17 @@ define Device/xiaomi_nand_separate
 endef
 
 define Device/xiaomi_mi-router-3g
-  $(Device/xiaomi_nand_separate)
-  DEVICE_MODEL := Mi Router 3G
-  IMAGE_SIZE := 124416k
+  $(Device/dsa-migration)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_MODEL := Mi Router 3G
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
   DEVICE_PACKAGES += kmod-mt7603 kmod-mt76x2 kmod-usb3 \
 	kmod-usb-ledtrig-usbport
   SUPPORTED_DEVICES += R3G mir3g xiaomi,mir3g
@@ -1495,10 +1502,17 @@ endef
 TARGET_DEVICES += xiaomi_mi-router-3-pro
 
 define Device/xiaomi_mi-router-4
-  $(Device/xiaomi_nand_separate)
-  DEVICE_MODEL := Mi Router 4
-  IMAGE_SIZE := 124416k
+  $(Device/dsa-migration)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_MODEL := Mi Router 4
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
   DEVICE_PACKAGES += kmod-mt7603 kmod-mt76x2
 endef
 TARGET_DEVICES += xiaomi_mi-router-4
@@ -1515,19 +1529,33 @@ endef
 TARGET_DEVICES += xiaomi_mi-router-4a-gigabit
 
 define Device/xiaomi_mi-router-ac2100
-  $(Device/xiaomi_nand_separate)
-  DEVICE_MODEL := Mi Router AC2100
-  IMAGE_SIZE := 120320k
+  $(Device/dsa-migration)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_MODEL := Mi Router AC2100
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
   DEVICE_PACKAGES += kmod-mt7603 kmod-mt7615e kmod-mt7615-firmware
 endef
 TARGET_DEVICES += xiaomi_mi-router-ac2100
 
 define Device/xiaomi_redmi-router-ac2100
-  $(Device/xiaomi_nand_separate)
-  DEVICE_MODEL := Redmi Router AC2100
-  IMAGE_SIZE := 120320k
+  $(Device/dsa-migration)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_MODEL := Redmi Router AC2100
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
   DEVICE_PACKAGES += kmod-mt7603 kmod-mt7615e kmod-mt7615-firmware
 endef
 TARGET_DEVICES += xiaomi_redmi-router-ac2100
