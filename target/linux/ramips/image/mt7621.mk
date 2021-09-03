@@ -1459,6 +1459,7 @@ define Device/xiaomi_mi-router-3g
   UBINIZE_OPTS := -E 5
   IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := Mi Router 3G
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
@@ -1509,6 +1510,7 @@ define Device/xiaomi_mi-router-4
   UBINIZE_OPTS := -E 5
   IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := Mi Router 4
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
@@ -1536,6 +1538,7 @@ define Device/xiaomi_mi-router-ac2100
   UBINIZE_OPTS := -E 5
   IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := Mi Router AC2100
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
@@ -1552,6 +1555,7 @@ define Device/xiaomi_redmi-router-ac2100
   UBINIZE_OPTS := -E 5
   IMAGE_SIZE := 32768k
   IMAGES += factory.bin
+  DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := Redmi Router AC2100
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
@@ -1564,7 +1568,7 @@ define Device/xiaomi_mir3s
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 32448k
-  DEVICE_VENDOR := XIAOMI
+  DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := MIR3S
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 \
 	kmod-usb-ledtrig-usbport
