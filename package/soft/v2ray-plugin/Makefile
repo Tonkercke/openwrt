@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2ray-plugin
-PKG_VERSION:=4.41.0
+PKG_VERSION:=4.42.1
 PKG_RELEASE:=$(AUTORELEASE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/teddysun/v2ray-plugin/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=e23d6bbf828efa9b0ac722b4665c5b3c12df2046879a2efe8ee980a8912bba0b
+PKG_HASH:=cb4e39725f547680b8670efe08a67d68f6c28700baa5db05dd858d8075cd1e37
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
@@ -49,7 +49,6 @@ endif
 define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
-	SUBMENU:=Project V
 	TITLE:=SIP003 plugin for shadowsocks, based on v2ray
 	URL:=https://github.com/teddysun/v2ray-plugin
 	DEPENDS:=$(GO_ARCH_DEPENDS) +ca-certificates
