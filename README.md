@@ -2,6 +2,8 @@ openwrt
 =
 Version:21.02.0
 
+Changelog:https://openwrt.org/releases/21.02/changelog-21.02.0
+
 Compilation steps:
 
 **1 Must be installed**
