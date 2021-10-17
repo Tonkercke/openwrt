@@ -14,33 +14,36 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v$(PKG_VERSION)?
 PKG_HASH:=e4658c638e3159849f646943075f8f13e9d65a7f0818a3c669c31fa749406aae
 
-PKG_LICENSE:=Apache-2.0
-PKG_LICENSE_FILES:=LICENSE.txt
+PKG_LICENSE:=MIT
+PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=CN_SZTL <cnsztl@project-openwrt.eu.org>
 
-PKG_BUILD_DEPENDS:=golang/host node/host
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_FILEBROWSER_COMPRESS_UPX
+
+PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-
-PKG_CONFIG_DEPENDS:= \
-	CONFIG_FILEBROWSER_COMPRESS_GOPROXY \
-	CONFIG_FILEBROWSER_COMPRESS_UPX
 
 GO_PKG:=github.com/filebrowser/filebrowser
 GO_PKG_LDFLAGS:=-s -w
 GO_PKG_LDFLAGS_X:= \
-	github.com/filebrowser/filebrowser/v2/version.CommitSHA=$(PKG_SOURCE_VERSION) \
-	github.com/filebrowser/filebrowser/v2/version.Version=$(PKG_VERSION)
+	$(GO_PKG).build=OpenWrt \
+	$(GO_PKG).version=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
-define Package/filebrowser
+define Package/filebrowser/template
   SECTION:=net
   CATEGORY:=Network
   TITLE:=Web File Browser which can be used as a middleware or standalone app.
   URL:=https://github.com/filebrowser/filebrowser
-  DEPENDS:=$(GO_ARCH_DEPENDS)
+endef
+
+define Package/filebrowser
+  $(call Package/filebrowser/template)
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
 endef
 
 define Package/filebrowser/description
@@ -51,26 +54,18 @@ define Package/filebrowser/description
 endef
 
 define Package/filebrowser/config
+menu "filebrowser Configuration"
+	depends on PACKAGE_filebrowser
+
 config FILEBROWSER_COMPRESS_UPX
 	bool "Compress executable files with UPX"
 	default y
+endmenu
 endef
 
 define Build/Compile
-( \
-  cd $(PKG_BUILD_DIR) ; \
-  rm -rf frontend/dist ; \
-  rm -f http/rice-box.go ; \
-  cd $(PKG_BUILD_DIR)/frontend ; \
-  npm ci; \
-  npm run lint ; \
-  npm run build ; \
-  GOOS=$$$$(go env GOOS) GOARCH=$$$$(go env GOARCH) GO111MODULE=off go get -v github.com/GeertJohan/go.rice/rice/... ; \
-  cd $(PKG_BUILD_DIR)/http ; \
-  "$$$$(go env GOPATH)/bin/rice" embed-go ; \
-  $(call GoPackage/Build/Compile) ; \
-)
-ifeq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),y)
+	$(call GoPackage/Build/Compile)
+ifneq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/filebrowser
 endif
 endef
