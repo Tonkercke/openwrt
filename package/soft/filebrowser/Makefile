@@ -36,8 +36,8 @@ include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/filebrowser
-  SECTION:=utils
-  CATEGORY:=Utilities
+  SECTION:=net
+  CATEGORY:=Network
   TITLE:=Web File Browser which can be used as a middleware or standalone app.
   URL:=https://github.com/filebrowser/filebrowser
   DEPENDS:=$(GO_ARCH_DEPENDS)
