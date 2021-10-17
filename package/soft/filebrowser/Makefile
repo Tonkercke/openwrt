@@ -73,7 +73,7 @@ endef
 define Package/filebrowser/install
 	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
 	$(INSTALL_DIR) $(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/v2ray $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/filebrowser $(1)/usr/bin/
 endef
 
 $(eval $(call GoBinPackage,filebrowser))
