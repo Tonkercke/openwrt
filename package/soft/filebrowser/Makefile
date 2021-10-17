@@ -34,16 +34,12 @@ GO_PKG_LDFLAGS_X:= \
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
-define Package/filebrowser/template
-  SECTION:=net
-  CATEGORY:=Network
+define Package/filebrowser
+  SECTION:=utils
+  CATEGORY:=Utilities
   TITLE:=Web File Browser which can be used as a middleware or standalone app.
   URL:=https://github.com/filebrowser/filebrowser
-endef
-
-define Package/filebrowser
-  $(call Package/filebrowser/template)
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
+  DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
 define Package/filebrowser/description
@@ -65,15 +61,17 @@ endef
 
 define Build/Compile
 	$(call GoPackage/Build/Compile)
-ifneq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),)
+ifneq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),y)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/filebrowser
 endif
 endef
 
 define Package/filebrowser/install
 	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
-	$(INSTALL_DIR) $(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/filebrowser $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/etc/config/ $(1)/etc/init.d/ $(1)/usr/bin/
+	$(INSTALL_CONF) $(CURDIR)/files/filebrowser.config $(1)/etc/config/filebrowser
+	$(INSTALL_BIN) $(CURDIR)/files/filebrowser.init $(1)/etc/init.d/filebrowser
+	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/filebrowser $(1)/usr/bin/filebrowser
 endef
 
 $(eval $(call GoBinPackage,filebrowser))
