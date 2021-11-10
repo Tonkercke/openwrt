@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2ray-plugin
-PKG_VERSION:=4.42.2
+PKG_VERSION:=4.43.0
 PKG_RELEASE:=$(AUTORELEASE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/teddysun/v2ray-plugin/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=e7fabd609b37e87cdf40a191c154802660faec9b6357331ee71988a2757fff31
+PKG_HASH:=2de15ec4b66ee401fe83e31ad78d5d4c6d9f7b242b8fe7d8af5ce4f19bdf565a
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
@@ -28,7 +28,9 @@ GO_PKG:=github.com/shadowsocks/v2ray-plugin
 GO_PKG_LDFLAGS:=-s -w
 GO_PKG_LDFLAGS_X:=main.VERSION=v$(PKG_VERSION)
 
-PKG_CONFIG_DEPENDS := CONFIG_$(PKG_NAME)_INCLUDE_GOPROXY
+PKG_CONFIG_DEPENDS := \
+	CONFIG_$(PKG_NAME)_INCLUDE_GOPROXY \
+	CONFIG_$(PKG_NAME)_COMPRESS_UPX
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -38,6 +40,10 @@ config $(PKG_NAME)_INCLUDE_GOPROXY
 	bool "Compiling with GOPROXY proxy"
 	default n
 
+config $(PKG_NAME)_COMPRESS_UPX
+	bool "Compress executable files with UPX"
+	depends on !mips64
+	default y
 endef
 
 ifeq ($(CONFIG_$(PKG_NAME)_INCLUDE_GOPROXY),y)
@@ -60,7 +66,9 @@ endef
 
 define Build/Compile
 	$(call GoPackage/Build/Compile)
+ifneq ($(CONFIG_$(PKG_NAME)_COMPRESS_UPX),)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/v2ray-plugin
+endif
 endef
 
 define Package/$(PKG_NAME)/install
