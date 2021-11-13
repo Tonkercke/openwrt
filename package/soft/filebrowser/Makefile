@@ -60,7 +60,16 @@ endmenu
 endef
 
 define Build/Compile
-	$(call GoPackage/Build/Compile)
+( \
+  cd $(PKG_BUILD_DIR)/frontend ; \
+  npm ci; \
+  npm run lint ; \
+  npm run build ; \
+  GOOS=$$$$(go env GOOS) GOARCH=$$$$(go env GOARCH) GO111MODULE=off go get -v github.com/GeertJohan/go.rice/rice/... ; \
+  cd $(PKG_BUILD_DIR)/http ; \
+  "$$$$(go env GOPATH)/bin/rice" embed-go ; \
+  $(call GoPackage/Build/Compile) ; \
+)
 ifneq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),y)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/filebrowser
 endif
