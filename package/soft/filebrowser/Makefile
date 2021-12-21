@@ -7,12 +7,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser
-PKG_VERSION:=2.19.0
+PKG_VERSION:=2.20.0
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=f57ff24b52565b544a8d0e297f384adfb52884f76fccadda0d31e56434116d9a
+PKG_HASH:=ad55e74d3dbd9350405c8697c88d70d4dc52a0e1beb7d921ac5adad2328127f4
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
