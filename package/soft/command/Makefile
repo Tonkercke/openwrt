@@ -1,17 +1,19 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=Command
+PKG_NAME:=command
 PKG_VERSION:=0.1
 PKG_RELEASE:=$(AUTORELEASE)
 
-define Package/Command/template
-  TITLE:=Change network MAC
+include $(INCLUDE_DIR)/package.mk
+
+define Package/command
   SECTION:=net
   CATEGORY:=Network
+  TITLE:=A tool to change Mac address
 endef
 
-define Package/Command/install
-	$(INSTALL_DIR) $(1)/etc/config/
+define Package/command/install
+	$(INSTALL_DIR) $(1)/etc/config/scp/
 	$(INSTALL_DATA) $(CURDIR)/files/ch_ap_mac.sh $(1)/etc/config/scp/
 	$(INSTALL_DATA) $(CURDIR)/files/ap_mac.txt $(1)/etc/config/scp/
 	$(INSTALL_DATA) $(CURDIR)/files/ch_mac.sh $(1)/etc/config/scp/
@@ -19,4 +21,4 @@ define Package/Command/install
 
 endef
 
-$(eval $(call BuildPackage,Command))
+$(eval $(call BuildPackage,command))
