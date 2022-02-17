@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=xray-plugin
 PKG_VERSION:=1.5.3
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/teddysun/xray-plugin/tar.gz/v$(PKG_VERSION)?
@@ -14,7 +14,7 @@ PKG_HASH:=0280e1c7c9c87db13a456be098e42065374066df4108b87c2e1d781337740a73
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=Tianling Shen <cnsztl@project-openwrt.eu.org>
+PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_XRAY_PLUGIN_COMPRESS_GOPROXY \
@@ -43,7 +43,7 @@ endef
 
 ifneq ($(CONFIG_XRAY_PLUGIN_COMPRESS_GOPROXY),)
 	export GO111MODULE=on
-	export GOPROXY=https://goproxy.io
+	export GOPROXY=https://goproxy.baidu.com
 endif
 
 define Package/xray-plugin
@@ -60,11 +60,6 @@ define Build/Compile
 ifneq ($(CONFIG_XRAY_PLUGIN_COMPRESS_UPX),)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/xray-plugin
 endif
-endef
-
-define Package/xray-plugin/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/xray-plugin $(1)/usr/bin/xray-plugin
 endef
 
 $(eval $(call GoBinPackage,xray-plugin))
