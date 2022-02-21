@@ -18,6 +18,9 @@ PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=CN_SZTL <cnsztl@project-openwrt.eu.org>
 
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_FILEBROWSER_COMPRESS_UPX
+
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
@@ -46,6 +49,16 @@ define Package/filebrowser/description
   It can be used as a standalone app or as a middleware.
 endef
 
+define Package/filebrowser/config
+menu "filebrowser Configuration"
+	depends on PACKAGE_filebrowser
+
+config FILEBROWSER_COMPRESS_UPX
+	bool "Compress executable files with UPX"
+	default y
+endmenu
+endef
+
 define Build/Compile
 ( \
   cd $(PKG_BUILD_DIR)/frontend ; \
@@ -57,6 +70,9 @@ define Build/Compile
   "$$$$(go env GOPATH)/bin/rice" embed-go ; \
   $(call GoPackage/Build/Compile) ; \
 )
+ifneq ($(CONFIG_FILEBROWSER_COMPRESS_UPX),y)
+	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/filebrowser
+endif
 endef
 
 define Package/filebrowser/install
