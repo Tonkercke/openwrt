@@ -8,11 +8,6 @@
 / {
 	model = "ASUS Lyra MAP-AC2200";
 	compatible = "asus,map-ac2200";
-	
-	memory {
-		device_type = "memory";
-		reg = <0x100000000 0x10000000>;
-	};
 
 	aliases {
 		led-boot = &led_blue0;
