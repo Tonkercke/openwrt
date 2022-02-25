@@ -539,7 +539,7 @@ define Device/comfast_cf-e313ac
   DEVICE_MODEL := CF-E313AC
   DEVICE_PACKAGES := rssileds kmod-ath10k-ct-smallbuffers \
 	ath10k-firmware-qca9888-ct -swconfig -uboot-envtools
-  IMAGE_SIZE := 7936k
+  IMAGE_SIZE := 16192k
 endef
 TARGET_DEVICES += comfast_cf-e313ac
 
@@ -549,7 +549,7 @@ define Device/comfast_cf-e314n-v2
   DEVICE_MODEL := CF-E314N
   DEVICE_VARIANT := v2
   DEVICE_PACKAGES := rssileds
-  IMAGE_SIZE := 7936k
+  IMAGE_SIZE := 16192k
 endef
 TARGET_DEVICES += comfast_cf-e314n-v2
 
