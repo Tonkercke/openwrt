@@ -238,11 +238,6 @@
 	};
 };
 
-&usb2_hs_phy {
-	/* Bluetooth module attached via USB */
-	status = "okay";
-};
-
 &blsp1_i2c3 {
 	pinctrl-0 = <&i2c_0_pins>;
 	pinctrl-names = "default";
