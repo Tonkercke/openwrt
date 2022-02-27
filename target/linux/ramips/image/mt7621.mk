@@ -1099,7 +1099,7 @@ define Device/netgear_wndr3700-v5
   $(Device/dsa-migration)
   $(Device/netgear_sercomm_nor)
   $(Device/uimage-lzma-loader)
-  IMAGE_SIZE := 15232k
+  IMAGE_SIZE := 32448k
   DEVICE_MODEL := WNDR3700
   DEVICE_VARIANT := v5
   SERCOMM_HWNAME := WNDR3700v5
