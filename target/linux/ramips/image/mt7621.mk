@@ -1566,7 +1566,7 @@ TARGET_DEVICES += youhua_wr1200js
 
 define Device/youku_yk-l2
   $(Device/dsa-migration)
-  IMAGE_SIZE := 16064k
+  IMAGE_SIZE := 32448k
   DEVICE_VENDOR := Youku
   DEVICE_MODEL := YK-L2
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 \
