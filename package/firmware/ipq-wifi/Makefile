@@ -68,6 +68,11 @@ define ipq-wifi-install-one-to
   $(INSTALL_DATA) $(1) $(2)/lib/firmware/ath10k/$(3)/board-2.bin
 endef
 
+define ipq-wifi-install-ath11-one-to
+  $(INSTALL_DIR)  $(2)/lib/firmware/ath11k/$(3)/
+  $(INSTALL_DATA) $(1) $(2)/lib/firmware/ath11k/$(3)/board-2.bin
+endef
+
 define ipq-wifi-install-one
   $(if $(filter $(suffix $(1)),.QCA4019 .qca4019),\
     $(call ipq-wifi-install-one-to,$(1),$(2),QCA4019/hw1.0),\
