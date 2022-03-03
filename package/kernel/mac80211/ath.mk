@@ -1,6 +1,6 @@
 PKG_DRIVERS += \
 	ath ath5k ath6kl ath6kl-sdio ath6kl-usb ath9k ath9k-common ath9k-htc ath10k ath10k-smallbuffers \
-	ath11k ath11k-ahb ath11k-pci carl9170 owl-loader ar5523 wil6210
+	carl9170 owl-loader ar5523 wil6210
 
 PKG_CONFIG_DEPENDS += \
 	CONFIG_PACKAGE_ATH_DEBUG \
@@ -12,7 +12,6 @@ PKG_CONFIG_DEPENDS += \
 	CONFIG_ATH9K_TX99 \
 	CONFIG_ATH10K_LEDS \
 	CONFIG_ATH10K_THERMAL \
-	CONFIG_ATH11K_MEM_PROFILE_512M \
 	CONFIG_ATH_USER_REGD
 
 ifdef CONFIG_PACKAGE_MAC80211_DEBUGFS
@@ -288,63 +287,6 @@ define KernelPackage/ath10k-smallbuffers
   $(call KernelPackage/ath10k)
   TITLE+= (small buffers for low-RAM devices)
   VARIANT:=smallbuffers
-endef
-
-define KernelPackage/ath11k
-  $(call KernelPackage/mac80211/Default)
-  TITLE:=Qualcomm 802.11ax wireless chipset support (common code)
-  URL:=https://wireless.wiki.kernel.org/en/users/drivers/ath11k
-  DEPENDS+= +kmod-ath +@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT +@DRIVER_11AX_SUPPORT \
-	+kmod-crypto-michael-mic +ATH11K_THERMAL:kmod-hwmon-core +ATH11K_THERMAL:kmod-thermal
-  FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath11k/ath11k.ko
-  AUTOLOAD:=$(call AutoProbe,ath11k)
-endef
-
-define KernelPackage/ath11k/description
-This module adds support for Qualcomm Technologies 802.11ax family of
-chipsets.
-endef
-
-define KernelPackage/ath11k/config
-
-       config ATH11K_THERMAL
-               bool "Enable thermal sensors and throttling support"
-               depends on PACKAGE_kmod-ath11k
-               default y if TARGET_ipq807x
-
-       config ATH11K_MEM_PROFILE_512M
-               bool "Enable 512MB profile"
-               depends on PACKAGE_kmod-ath11k
-               default y if TARGET_ipq807x_generic_DEVICE_redmi_ax6 || TARGET_ipq807x_generic_DEVICE_xiaomi_ax3600 || TARGET_ipq807x_generic_DEVICE_zte_mf269
-
-endef
-
-define KernelPackage/ath11k-ahb
-  $(call KernelPackage/mac80211/Default)
-  TITLE:=Qualcomm 802.11ax AHB wireless chipset support
-  URL:=https://wireless.wiki.kernel.org/en/users/drivers/ath11k
-  DEPENDS+= @TARGET_ipq807x +kmod-ath11k
-  FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath11k/ath11k_ahb.ko
-  AUTOLOAD:=$(call AutoProbe,ath11k_ahb)
-endef
-
-define KernelPackage/ath11k-ahb/description
-This module adds support for Qualcomm Technologies 802.11ax family of
-chipsets with AHB bus.
-endef
-
-define KernelPackage/ath11k-pci
-  $(call KernelPackage/mac80211/Default)
-  TITLE:=Qualcomm 802.11ax PCI wireless chipset support
-  URL:=https://wireless.wiki.kernel.org/en/users/drivers/ath11k
-  DEPENDS+= @PCI_SUPPORT @TARGET_ipq807x +kmod-ath11k
-  FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath11k/ath11k_pci.ko
-  AUTOLOAD:=$(call AutoProbe,ath11k_pci)
-endef
-
-define KernelPackage/ath11k-pci/description
-This module adds support for Qualcomm Technologies 802.11ax family of
-chipsets with PCI bus.
 endef
 
 define KernelPackage/carl9170
