@@ -378,4 +378,5 @@
 &wifi1 {
 	status = "okay";
 	qcom,ath10k-calibration-variant = "R619AC";
+	ieee80211-freq-limit = <5000000 6000000>;
 };
