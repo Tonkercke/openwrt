@@ -133,8 +133,13 @@
 			};
 
 			partition@400000 {
+				label = "ART";
+				reg = <0x400000 0x10000>;
+			};
+			
+			partition@410000 {
 				label = "ubi";
-				reg = <0x400000 0x7c00000>;
+				reg = <0x410000 0x7c00000>;
 			};
 		};
 	};
@@ -214,7 +219,7 @@
 &wifi1 {
 	status = "okay";
 	qcom,ath10k-calibration-variant = "ASUS-MAP-AC2200";
-	ieee80211-freq-limit = <5470000 5875000>;
+	ieee80211-freq-limit = <5000000 6000000>;
 };
 
 &pcie0 {
