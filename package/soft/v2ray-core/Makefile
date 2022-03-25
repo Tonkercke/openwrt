@@ -105,7 +105,7 @@ config V2RAY_CORE_COMPRESS_GOPROXY
 config V2RAY_CORE_COMPRESS_UPX
 	bool "Compress executable files with UPX"
 	depends on !mips64
-	default n
+	default y
 endmenu
 endef
 
