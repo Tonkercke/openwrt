@@ -503,21 +503,6 @@ define Device/buffalo_wzr-hp-g450h
 endef
 TARGET_DEVICES += buffalo_wzr-hp-g450h
 
-define Device/bm100_hq55
-  $(Device/loader-okli-uimage)
-  SOC := ar9344
-  DEVICE_VENDOR := BM100
-  DEVICE_MODEL := HQ55
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport kmod-leds-gpio
-  IMAGE_SIZE := 14656k
-  LOADER_FLASH_OFFS := 0x60000
-  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
-  IMAGES += loader-factory.bin uboot-factory.bin breed-factory.bin
-  IMAGE/factory.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | \
-			     prepad-okli-kernel $(1) | pad-to 14720k | append-okli-kernel $(1)
-endef
-TARGET_DEVICES += bm100_hq55
-
 define Device/comfast_cf-e110n-v2
   SOC := qca9533
   DEVICE_VENDOR := COMFAST
@@ -554,7 +539,7 @@ define Device/comfast_cf-e313ac
   DEVICE_MODEL := CF-E313AC
   DEVICE_PACKAGES := rssileds kmod-ath10k-ct-smallbuffers \
 	ath10k-firmware-qca9888-ct -swconfig -uboot-envtools
-  IMAGE_SIZE := 16192k
+  IMAGE_SIZE := 7936k
 endef
 TARGET_DEVICES += comfast_cf-e313ac
 
@@ -564,7 +549,7 @@ define Device/comfast_cf-e314n-v2
   DEVICE_MODEL := CF-E314N
   DEVICE_VARIANT := v2
   DEVICE_PACKAGES := rssileds
-  IMAGE_SIZE := 16192k
+  IMAGE_SIZE := 7936k
 endef
 TARGET_DEVICES += comfast_cf-e314n-v2
 
