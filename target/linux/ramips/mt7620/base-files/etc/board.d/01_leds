@@ -85,12 +85,6 @@ dlink,dwr-960)
 dovado,tiny-ac)
 	ucidef_set_led_netdev "wifi_led" "wifi" "orange:wifi" "wlan0"
 	;;
-dw22d)
-	ucidef_set_led_default "system" "system" "dw22d:green:system" "1"
-	ucidef_set_led_netdev "internet" "internet" "dw22d:red:internet" "eth0.2"
-	set_wifi_led "dw22d:green:wlan2g"
-	ucidef_set_led_netdev "wifi5g" "wifi5g" "dw22d:red:system" "rai0"
-	;;
 edimax,br-6478ac-v2|\
 edimax,ew-7478apc)
 	ucidef_set_led_netdev "wifi_led" "wifi" "blue:wlan" "wlan0"
@@ -201,9 +195,9 @@ tplink,archer-mr200)
 tplink,re200-v1)
 	ucidef_set_led_netdev "lan" "lan" "green:lan" "eth0"
 	;;
-youku,yk1)
+wavlink,wl-wn579x3)
+	ucidef_set_led_switch "lan" "lan" "blue:lan" "switch0" "0x20"
 	ucidef_set_led_switch "wan" "wan" "blue:wan" "switch0" "0x10"
-	ucidef_set_led_netdev "wifi_led" "wifi" "blue:air" "wlan0"
 	;;
 zbtlink,zbt-ape522ii)
 	ucidef_set_led_netdev "wlan2g4" "wlan1-link" "green:wlan2g4" "wlan1"
