@@ -51,6 +51,16 @@
 			linux,default-trigger = "dsa-0.0:02:1Gbps";
 		};
 	};
+	
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
 
 	reg_usb_vbus: regulator {
 		compatible = "regulator-fixed";
