@@ -12,7 +12,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=35a5fd694f41ddd606c98fef90557d7d2c5ade04a8add622a0f0a58f407b1afc
+PKG_HASH:=a90b513929d194cb38aac2ff2e3d27d4cbb08508fa3ad0b33e9f3788b6e357a4
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
