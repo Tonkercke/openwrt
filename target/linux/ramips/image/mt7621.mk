@@ -399,8 +399,8 @@ define Device/d-team_newifi-d2
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := Newifi
   DEVICE_MODEL := D2
-  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb2 kmod-usb-ohci \
-	kmod-usb-ledtrig-usbport
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb-ohci \
+	kmod-usb3 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += d-team_newifi-d2
 
