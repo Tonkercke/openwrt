@@ -135,12 +135,12 @@
 			
 			partition@400000 {
 				label = "ART";
-				reg = <0x00400000 0x00010000>;
+				reg = <0x400000 0x10000>;
 			};
 
 			partition@410000 {
 				label = "ubi";
-				reg = <0x410000 0x17c00000>;
+				reg = <0x410000 0xfbf0000>;
 			};
 		};
 	};
