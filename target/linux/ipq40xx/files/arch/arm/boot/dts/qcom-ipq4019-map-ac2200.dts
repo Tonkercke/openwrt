@@ -140,7 +140,7 @@
 
 			partition@480000 {
 				label = "ubi";
-				reg = <0x480000 0x7bf0000>;
+				reg = <0x480000 0x7b80000>;
 			};
 		};
 	};
@@ -220,7 +220,6 @@
 &wifi1 {
 	status = "okay";
 	qcom,ath10k-calibration-variant = "ASUS-MAP-AC2200";
-	ieee80211-freq-limit = <5000000 6000000>;
 };
 
 &pcie0 {
