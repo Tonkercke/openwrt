@@ -158,9 +158,13 @@ TARGET_DEVICES += aruba_ap-365
 
 define Device/asus_map-ac2200
 	$(call Device/FitImageLzma)
+	$(call Device/UbiFit)
 	DEVICE_VENDOR := ASUS
 	DEVICE_MODEL := Lyra (MAP-AC2200)
 	SOC := qcom-ipq4019
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	IMAGE_SIZE := 92160k
 	DEVICE_PACKAGES := ath10k-firmware-qca9888-ct kmod-ath3k
 endef
 TARGET_DEVICES += asus_map-ac2200
