@@ -133,8 +133,8 @@
 				read-only;
 			};
 			
-			art: partition@400000 {
-				label = "ART";
+			factory: partition@400000 {
+				label = "Factory";
 				reg = <0x400000 0x80000>;
 			};
 

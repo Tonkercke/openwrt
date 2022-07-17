@@ -61,6 +61,7 @@ platform_do_upgrade() {
 	aruba,ap-303 |\
 	aruba,ap-303h |\
 	aruba,ap-365 |\
+	asus,map-ac2200 |\
 	avm,fritzbox-7530 |\
 	avm,fritzrepeater-1200 |\
 	avm,fritzrepeater-3000 |\
@@ -85,10 +86,6 @@ platform_do_upgrade() {
 			fw_setenv active 1 || exit 1
 			CI_UBIPART="rootfs1"
 		fi
-		nand_do_upgrade "$1"
-		;;
-	asus,map-ac2200)
-		CI_KERNPART="linux"
 		nand_do_upgrade "$1"
 		;;
 	asus,rt-ac58u)
