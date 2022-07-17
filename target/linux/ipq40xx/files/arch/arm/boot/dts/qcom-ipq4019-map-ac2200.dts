@@ -140,7 +140,7 @@
 
 			partition@410000 {
 				label = "ubi";
-				reg = <0x410000 0xfbf0000>;
+				reg = <0x410000 0x7bf0000>;
 			};
 		};
 	};
