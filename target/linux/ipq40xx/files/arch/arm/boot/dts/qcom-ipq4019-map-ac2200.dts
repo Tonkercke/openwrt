@@ -24,6 +24,10 @@
 
 		mdio@90000 {
 			status = "okay";
+			pinctrl-0 = <&mdio_pins>;
+			pinctrl-names = "default";
+			reset-gpios = <&tlmm 47 GPIO_ACTIVE_LOW>;
+			reset-delay-us = <1000>;
 		};
 
 		ess-psgmii@98000 {
@@ -46,10 +50,6 @@
 			compatible = "qcom,tcsr";
 			reg = <0x1957000 0x100>;
 			qcom,wifi_noc_memtype_m0_m2 = <TCSR_WIFI_NOC_MEMTYPE_M0_M2>;
-		};
-
-		usb2@60f8800 {
-			status = "okay";
 		};
 
 		crypto@8e3a000 {
@@ -76,12 +76,6 @@
 			label = "reset";
 			gpios = <&tlmm 34 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
-		};
-
-		wps {
-			label = "wps";
-			gpios = <&tlmm 18 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_WPS_BUTTON>;
 		};
 	};
 };
