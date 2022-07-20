@@ -164,7 +164,6 @@ define Device/asus_map-ac2200
 	SOC := qcom-ipq4019
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	IMAGE_SIZE := 92160k
 	DEVICE_PACKAGES := ath10k-firmware-qca9888-ct kmod-ath3k
 endef
 TARGET_DEVICES += asus_map-ac2200

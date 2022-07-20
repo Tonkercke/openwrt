@@ -4,7 +4,6 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/soc/qcom,tcsr.h>
-#include <dt-bindings/leds/common.h>
 
 / {
 	model = "ASUS Lyra MAP-AC2200";
@@ -48,6 +47,10 @@
 			qcom,wifi_noc_memtype_m0_m2 = <TCSR_WIFI_NOC_MEMTYPE_M0_M2>;
 		};
 
+		usb2@60f8800 {
+			status = "okay";
+		};
+
 		crypto@8e3a000 {
 			status = "okay";
 		};
@@ -73,6 +76,12 @@
 			gpios = <&tlmm 34 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
 		};
+
+		wps {
+			label = "wps";
+			gpios = <&tlmm 18 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
 	};
 };
 
@@ -89,76 +98,48 @@
 
 			partition@0 {
 				label = "SBL1";
-				reg = <0x0 0x100000>;
+				reg = <0x0 0x80000>;
+				read-only;
+			};
+
+			partition@80000 {
+				label = "MIBIB";
+				reg = <0x80000 0x80000>;
 				read-only;
 			};
 
 			partition@100000 {
-				label = "MIBIB";
+				label = "QSEE";
 				reg = <0x100000 0x100000>;
 				read-only;
 			};
 
 			partition@200000 {
-				label = "BOOTCONFIG";
-				reg = <0x200000 0x100000>;
-			};
-
-			partition@300000 {
-				label = "QSEE";
-				reg = <0x300000 0x100000>;
-				read-only;
-			};
-
-			partition@400000 {
-				label = "QSEE_1";
-				reg = <0x400000 0x100000>;
-				read-only;
-			};
-
-			partition@500000 {
 				label = "CDT";
-				reg = <0x500000 0x80000>;
+				reg = <0x200000 0x80000>;
 				read-only;
 			};
 
-			partition@580000 {
-				label = "CDT_1";
-				reg = <0x580000 0x80000>;
-				read-only;
-			};
-
-			partition@600000 {
-				label = "BOOTCONFIG1";
-				reg = <0x600000 0x80000>;
-			};
-
-			partition@680000 {
-				label = "APPSBLENV";
-				reg = <0x680000 0x80000>;
-			};
-
-			partition@700000 {
+			partition@280000 {
 				label = "APPSBL";
-				reg = <0x700000 0x200000>;
+				reg = <0x280000 0x140000>;
 				read-only;
 			};
 
-			partition@900000 {
-				label = "APPSBL_1";
-				reg = <0x900000 0x200000>;
+			partition@3c0000 {
+				label = "APPSBLENV";
+				reg = <0x3c0000 0x40000>;
 				read-only;
 			};
-
-			art: partition@b00000 {
+			
+			art: partition@400000 {
 				label = "ART";
-				reg = <0xb00000 0x80000>;
-				read-only;
+				reg = <0x400000 0x80000>;
 			};
 
-			partition@b80000 {
+			partition@480000 {
 				label = "ubi";
-				reg = <0xb80000 0x7480000>;
+				reg = <0x480000 0x7b80000>;
 			};
 		};
 	};
@@ -238,6 +219,7 @@
 &wifi1 {
 	status = "okay";
 	qcom,ath10k-calibration-variant = "ASUS-MAP-AC2200";
+	ieee80211-freq-limit = <5000000 6000000>;
 };
 
 &pcie0 {
@@ -270,96 +252,69 @@
 		/* 9-channel RGB LED controller */
 		compatible = "national,lp5523";
 		reg = <0x32>;
-		clock-mode = /bits/ 8 <1>;
-		#address-cells = <1>;
-		#size-cells = <0>;
+		clock-mode = [01];
 
-		/*
-		 * There is only one single extremely bright RGB-LED.
-		 * The RGB-color channels are running in parallel to
-		 * increase the current delivery capabilities beyond
-		 * what a single PWM-output of the controller can do.
-		 */
-
-		led_blue0: led@0 {
-			chan-name = "blue-0";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <0>;
-			color = <LED_COLOR_ID_BLUE>;
-			function-enumerator = <0>;
+		led_blue0: blue0 {
+			chan-name = "blue0";
+			label = "blue:chan0";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@1 {
-			chan-name = "blue-1";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <1>;
-			color = <LED_COLOR_ID_BLUE>;
-			function-enumerator = <1>;
+		blue1 {
+			chan-name = "blue1";
+			label = "blue:chan1";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@2 {
-			chan-name = "blue-2";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <2>;
-			color = <LED_COLOR_ID_BLUE>;
-			function-enumerator = <2>;
+		blue2 {
+			chan-name = "blue2";
+			label = "blue:chan2";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led_green0: led@3 {
-			chan-name = "green-0";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <3>;
-			color = <LED_COLOR_ID_GREEN>;
-			function-enumerator = <0>;
+		led_green0: green0 {
+			chan-name = "green0";
+			label = "green:chan0";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@4 {
-			chan-name = "green-1";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <4>;
-			color = <LED_COLOR_ID_GREEN>;
-			function-enumerator = <1>;
+		green1 {
+			chan-name = "green1";
+			label = "green:chan1";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@5 {
-			chan-name = "green-2";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <5>;
-			color = <LED_COLOR_ID_GREEN>;
-			function-enumerator = <2>;
+		green2 {
+			chan-name = "green2";
+			label = "green:chan2";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led_red0: led@6 {
-			chan-name = "red-0";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <6>;
-			color = <LED_COLOR_ID_RED>;
-			function-enumerator = <0>;
+		led_red0: red0 {
+			chan-name = "red0";
+			label = "red:chan0";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@7 {
-			chan-name = "red-1";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <7>;
-			color = <LED_COLOR_ID_RED>;
-			function-enumerator = <1>;
+		red1 {
+			chan-name = "red1";
+			label = "red:chan1";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 
-		led@8 {
-			chan-name = "red-2";
-			led-cur = /bits/ 8 <0xfa>;
-			max-cur = /bits/ 8 <0xff>;
-			reg = <8>;
-			color = <LED_COLOR_ID_RED>;
-			function-enumerator = <2>;
+		red2 {
+			chan-name = "red2";
+			label = "red:chan2";
+			led-cur = [fa];
+			max-cur = [ff];
 		};
 	};
 };
