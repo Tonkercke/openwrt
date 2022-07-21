@@ -131,32 +131,16 @@
 				reg = <0x3c0000 0x40000>;
 				read-only;
 			};
+			
+			art: partition@400000 {
+				label = "ART";
+				reg = <0x400000 0x80000>;
+				read-only;
+			};
 
-			partition@400000 {
+			partition@480000 {
 				label = "ubi";
 				reg = <0x400000 0x7c00000>;
-			};
-		};
-	};
-};
-
-&blsp1_spi1 {
-	status = "okay";
-
-	flash@0 {
-		reg = <0>;
-		compatible = "jedec,spi-nor";
-		spi-max-frequency = <24000000>;
-
-		partitions {
-			compatible = "fixed-partitions";
-			#address-cells = <1>;
-			#size-cells = <1>;
-
-			art: partition@0 {
-				label = "ART";
-				reg = <0x0 0x80000>;
-				read-only;
 			};
 		};
 	};
