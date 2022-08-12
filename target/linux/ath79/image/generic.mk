@@ -2266,7 +2266,7 @@ define Device/yuncore_xd3200
   SOC := qca9563
   DEVICE_VENDOR := YunCore
   DEVICE_MODEL := XD3200
-  DEVICE_PACKAGES := kmod-ath10k-ct ath10k-firmware-qca9888-ct
+  DEVICE_PACKAGES := kmod-ath10k-ct ath10k-firmware-qca988x-ct
   IMAGE_SIZE := 16000k
   IMAGES += tftp.bin
   IMAGE/tftp.bin := $$(IMAGE/sysupgrade.bin) | yuncore-tftp-header-16m
