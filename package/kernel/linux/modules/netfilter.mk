@@ -1179,14 +1179,3 @@ define KernelPackage/nft-queue
 endef
 
 $(eval $(call KernelPackage,nft-queue))
-
-
-define KernelPackage/nf-tproxy
-  SUBMENU:=$(NF_MENU)
-  TITLE:=Netfilter TPROXY support
-  KCONFIG:=$(KCONFIG_NF_TPROXY)
-  FILES:=$(foreach mod,$(NF_TPROXY-m),$(LINUX_DIR)/net/$(mod).ko)
-  AUTOLOAD:=$(call AutoProbe,$(notdir $(NF_TPROXY-m)))
-endef
-
-$(eval $(call KernelPackage,nf-tproxy))
