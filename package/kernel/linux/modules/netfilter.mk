@@ -1190,13 +1190,3 @@ define KernelPackage/nft-tproxy
 endef
 
 $(eval $(call KernelPackage,nft-tproxy))
-
-define KernelPackage/nft-compat
-  SUBMENU:=$(NF_MENU)
-  TITLE:=Netfilter nf_tables compat support
-  DEPENDS:=+kmod-nft-core +kmod-nf-ipt
-  FILES:=$(foreach mod,$(NFT_COMPAT-m),$(LINUX_DIR)/net/$(mod).ko)
-  AUTOLOAD:=$(call AutoProbe,$(notdir $(NFT_COMPAT-m)))
-  KCONFIG:=$(KCONFIG_NFT_COMPAT)
-endef
-$(eval $(call KernelPackage,nft-compat))
