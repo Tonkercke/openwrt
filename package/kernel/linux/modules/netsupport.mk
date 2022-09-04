@@ -48,6 +48,7 @@ define KernelPackage/bonding
   KCONFIG:=CONFIG_BONDING
   FILES:=$(LINUX_DIR)/drivers/net/bonding/bonding.ko
   AUTOLOAD:=$(call AutoLoad,40,bonding)
+  MODPARAMS.bonding:=max_bonds=0
 endef
 
 define KernelPackage/bonding/description
@@ -375,7 +376,7 @@ $(eval $(call KernelPackage,ip6-vti))
 define KernelPackage/xfrm-interface
   SUBMENU:=$(NETWORK_SUPPORT_MENU)
   TITLE:=IPsec XFRM Interface
-  DEPENDS:=+kmod-ipsec4 +IPV6:kmod-ipsec6
+  DEPENDS:=@IPV6 +kmod-ipsec4 +kmod-ipsec6
   KCONFIG:=CONFIG_XFRM_INTERFACE
   FILES:=$(LINUX_DIR)/net/xfrm/xfrm_interface.ko
   AUTOLOAD:=$(call AutoProbe,xfrm_interface)
@@ -563,6 +564,23 @@ endef
 $(eval $(call KernelPackage,veth))
 
 
+define KernelPackage/vrf
+  SUBMENU:=$(NETWORK_SUPPORT_MENU)
+  TITLE:=Virtual Routing and Forwarding (Lite)
+  DEPENDS:=@KERNEL_NET_L3_MASTER_DEV
+  KCONFIG:=CONFIG_NET_VRF
+  FILES:=$(LINUX_DIR)/drivers/net/vrf.ko
+  AUTOLOAD:=$(call AutoLoad,30,vrf)
+endef
+
+define KernelPackage/vrf/description
+ This option enables the support for mapping interfaces into VRF's. The
+ support enables VRF devices.
+endef
+
+$(eval $(call KernelPackage,vrf))
+
+
 define KernelPackage/slhc
   SUBMENU:=$(NETWORK_SUPPORT_MENU)
   HIDDEN:=1
@@ -720,12 +738,8 @@ endef
 $(eval $(call KernelPackage,mppe))
 
 
-SCHED_MODULES = $(patsubst $(LINUX_DIR)/net/sched/%.ko,%,$(wildcard $(LINUX_DIR)/net/sched/*.ko))
-SCHED_MODULES_CORE = sch_ingress sch_fq_codel sch_hfsc sch_htb sch_tbf cls_basic cls_fw cls_route cls_flow cls_tcindex cls_u32 em_u32 act_gact act_mirred act_skbedit cls_matchall
-SCHED_MODULES_FILTER = $(SCHED_MODULES_CORE) act_connmark act_ctinfo sch_cake sch_netem sch_mqprio em_ipset cls_bpf cls_flower act_bpf act_vlan
-SCHED_MODULES_EXTRA = $(filter-out $(SCHED_MODULES_FILTER),$(SCHED_MODULES))
-SCHED_FILES = $(patsubst %,$(LINUX_DIR)/net/sched/%.ko,$(filter $(SCHED_MODULES_CORE),$(SCHED_MODULES)))
-SCHED_FILES_EXTRA = $(patsubst %,$(LINUX_DIR)/net/sched/%.ko,$(SCHED_MODULES_EXTRA))
+SCHED_MODULES_CORE = sch_ingress sch_hfsc sch_htb sch_tbf cls_basic cls_fw cls_route cls_flow cls_tcindex cls_u32 em_u32 act_gact act_mirred act_skbedit cls_matchall
+SCHED_FILES_CORE = $(foreach mod,$(SCHED_MODULES_CORE),$(LINUX_DIR)/net/sched/$(mod).ko)
 
 define KernelPackage/sched-core
   SUBMENU:=$(NETWORK_SUPPORT_MENU)
@@ -736,7 +750,6 @@ define KernelPackage/sched-core
 	CONFIG_NET_SCH_HTB \
 	CONFIG_NET_SCH_TBF \
 	CONFIG_NET_SCH_INGRESS \
-	CONFIG_NET_SCH_FQ_CODEL \
 	CONFIG_NET_CLS=y \
 	CONFIG_NET_CLS_ACT=y \
 	CONFIG_NET_CLS_BASIC \
@@ -751,7 +764,7 @@ define KernelPackage/sched-core
 	CONFIG_NET_CLS_MATCHALL \
 	CONFIG_NET_EMATCH=y \
 	CONFIG_NET_EMATCH_U32
-  FILES:=$(SCHED_FILES)
+  FILES:=$(SCHED_FILES_CORE)
   AUTOLOAD:=$(call AutoLoad,70, $(SCHED_MODULES_CORE))
 endef
 
@@ -883,14 +896,16 @@ endef
 $(eval $(call KernelPackage,bpf-test))
 
 
+SCHED_MODULES_EXTRA = sch_codel sch_dsmark sch_gred sch_multiq sch_prio sch_red sch_sfq sch_teql sch_fq sch_pie act_police act_ipt act_pedit act_simple act_csum em_cmp em_nbyte em_meta em_text
+SCHED_FILES_EXTRA = $(foreach mod,$(SCHED_MODULES_EXTRA),$(LINUX_DIR)/net/sched/$(mod).ko)
+
 define KernelPackage/sched
   SUBMENU:=$(NETWORK_SUPPORT_MENU)
   TITLE:=Extra traffic schedulers
-  DEPENDS:=+kmod-sched-core +kmod-ipt-core +kmod-lib-crc32c
+  DEPENDS:=+kmod-sched-core +kmod-ipt-core +kmod-lib-crc32c +kmod-lib-textsearch
   KCONFIG:= \
 	CONFIG_NET_SCH_CODEL \
 	CONFIG_NET_SCH_DSMARK \
-	CONFIG_NET_SCH_FIFO \
 	CONFIG_NET_SCH_GRED \
 	CONFIG_NET_SCH_MULTIQ \
 	CONFIG_NET_SCH_PRIO \
@@ -966,6 +981,24 @@ define KernelPackage/tcp-hybla/description
 endef
 
 $(eval $(call KernelPackage,tcp-hybla))
+
+
+define KernelPackage/tcp-scalable
+  SUBMENU:=$(NETWORK_SUPPORT_MENU)
+  TITLE:=TCP-Scalable congestion control algorithm
+  KCONFIG:=CONFIG_TCP_CONG_SCALABLE
+  FILES:=$(LINUX_DIR)/net/ipv4/tcp_scalable.ko
+  AUTOLOAD:=$(call AutoProbe,tcp-scalable)
+endef
+
+define KernelPackage/tcp-scalable/description
+  Scalable TCP is a sender-side only change to TCP which uses a
+	MIMD congestion control algorithm which has some nice scaling
+	properties, though is known to have fairness issues.
+	See http://www.deneholme.net/tom/scalable/
+endef
+
+$(eval $(call KernelPackage,tcp-scalable))
 
 
 define KernelPackage/ax25
@@ -1257,6 +1290,31 @@ define KernelPackage/netlink-diag/description
 endef
 
 $(eval $(call KernelPackage,netlink-diag))
+
+
+define KernelPackage/inet-diag
+  SUBMENU:=$(NETWORK_SUPPORT_MENU)
+  TITLE:=INET diag support for ss utility
+  KCONFIG:= \
+	CONFIG_INET_DIAG \
+	CONFIG_INET_TCP_DIAG \
+	CONFIG_INET_UDP_DIAG \
+	CONFIG_INET_RAW_DIAG \
+	CONFIG_INET_DIAG_DESTROY=n
+  FILES:= \
+	$(LINUX_DIR)/net/ipv4/inet_diag.ko \
+	$(LINUX_DIR)/net/ipv4/tcp_diag.ko \
+	$(LINUX_DIR)/net/ipv4/udp_diag.ko \
+	$(LINUX_DIR)/net/ipv4/raw_diag.ko
+  AUTOLOAD:=$(call AutoLoad,31,inet_diag tcp_diag udp_diag raw_diag)
+endef
+
+define KernelPackage/inet-diag/description
+Support for INET (TCP, DCCP, etc) socket monitoring interface used by
+native Linux tools such as ss.
+endef
+
+$(eval $(call KernelPackage,inet-diag))
 
 
 define KernelPackage/wireguard

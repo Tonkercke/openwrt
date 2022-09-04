@@ -103,6 +103,7 @@ define Device/ubnt-xm
   IMAGE_SIZE := 7448k
   UBNT_BOARD := XM
   UBNT_CHIP := ar7240
+  UBNT_REVISION := 42.$(UBNT_REVISION)
   UBNT_TYPE := XM
   UBNT_VERSION := 6.0.0
   KERNEL := kernel-bin | append-dtb | relocate-kernel | lzma | uImage lzma
@@ -128,7 +129,7 @@ define Device/ubnt-unifi-jffs2
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma | jffs2 kernel0
   IMAGES := sysupgrade.bin factory.bin
   IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs |\
-	pad-rootfs | append-metadata | check-size
+	pad-rootfs | check-size | append-metadata
   IMAGE/factory.bin := $$(IMAGE/sysupgrade.bin) | mkubntimage2
 endef
 
@@ -245,6 +246,23 @@ define Device/ubnt_nanobeam-ac-gen2
 endef
 TARGET_DEVICES += ubnt_nanobeam-ac-gen2
 
+define Device/ubnt_nanobeam-ac-xc
+  $(Device/ubnt-xc)
+  SOC := qca9558
+  DEVICE_MODEL := NanoBeam AC
+  DEVICE_VARIANT := Gen1 (XC)
+  DEVICE_PACKAGES += kmod-ath10k-ct ath10k-firmware-qca988x-ct rssileds
+endef
+TARGET_DEVICES += ubnt_nanobeam-ac-xc
+
+define Device/ubnt_nanobeam-m5-xw
+  $(Device/ubnt-xw)
+  DEVICE_MODEL := NanoBeam M5
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += loco-m-xw
+endef
+TARGET_DEVICES += ubnt_nanobeam-m5-xw
+
 define Device/ubnt_nanobridge-m
   $(Device/ubnt-xm)
   SOC := ar7241
@@ -328,6 +346,22 @@ define Device/ubnt_powerbeam-5ac-gen2
 endef
 TARGET_DEVICES += ubnt_powerbeam-5ac-gen2
 
+define Device/ubnt_powerbeam-m2-xw
+  $(Device/ubnt-xw)
+  DEVICE_MODEL := PowerBeam M2
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += loco-m-xw
+endef
+TARGET_DEVICES += ubnt_powerbeam-m2-xw
+
+define Device/ubnt_powerbeam-m5-xw
+  $(Device/ubnt-xw)
+  DEVICE_MODEL := PowerBeam M5
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += loco-m-xw
+endef
+TARGET_DEVICES += ubnt_powerbeam-m5-xw
+
 define Device/ubnt_powerbridge-m
   $(Device/ubnt-xm)
   SOC := ar7241
@@ -336,6 +370,15 @@ define Device/ubnt_powerbridge-m
   SUPPORTED_DEVICES += bullet-m
 endef
 TARGET_DEVICES += ubnt_powerbridge-m
+
+define Device/ubnt_rocket-5ac-lite
+  $(Device/ubnt-xc)
+  SOC := qca9558
+  DEVICE_MODEL := Rocket 5AC
+  DEVICE_VARIANT := Lite
+  DEVICE_PACKAGES := kmod-ath10k-ct ath10k-firmware-qca988x-ct
+endef
+TARGET_DEVICES += ubnt_rocket-5ac-lite
 
 define Device/ubnt_rocket-m
   $(Device/ubnt-xm)
@@ -351,14 +394,24 @@ define Device/ubnt_routerstation_common
 	kmod-usb2 fconfig
   DEVICE_VENDOR := Ubiquiti
   SOC := ar7161
-  IMAGE_SIZE := 16128k
+  LOADER_TYPE := bin
+  LOADER_FLASH_OFFS := 0x50000
+  COMPILE := loader-$(1).bin
+  COMPILE/loader-$(1).bin := loader-okli-compile | lzma | pad-to 128k
+  IMAGE_SIZE := 16000k
   IMAGES += factory.bin
-  IMAGE/factory.bin := append-rootfs | pad-rootfs | mkubntimage | \
-	check-size
-  IMAGE/sysupgrade.bin := append-rootfs | pad-rootfs | combined-image | \
-	append-metadata | check-size
-  KERNEL := kernel-bin | append-dtb | lzma | pad-to $$(BLOCKSIZE)
+  IMAGE/factory.bin := append-kernel | uImage lzma -M 0x4f4b4c49 | pad-to $$$$(BLOCKSIZE) | \
+	append-rootfs | pad-rootfs | pad-to $$$$(BLOCKSIZE) | \
+	mkubntimage $$$$(KDIR)/loader-$(1).bin | check-size
+  IMAGE/sysupgrade.bin := append-kernel | uImage lzma -M 0x4f4b4c49 | pad-to $$$$(BLOCKSIZE) | \
+	append-rootfs | pad-rootfs | pad-to $$$$(BLOCKSIZE) | check-size | \
+	sysupgrade-tar kernel=$$$$(KDIR)/loader-$(1).bin rootfs=$$$$@ | append-metadata
+  KERNEL := kernel-bin | append-dtb | lzma
   KERNEL_INITRAMFS := kernel-bin | append-dtb
+  DEVICE_COMPAT_VERSION := 2.0
+  DEVICE_COMPAT_MESSAGE := Partition design has changed compared to older versions (19.07 and 21.02) \
+	due to kernel drivers restrictions. Upgrade via sysupgrade mechanism is one way operation. \
+	Downgrading OpenWrt version will involve usage of TFTP recovery or bootloader command line interface.
 endef
 
 define Device/ubnt_routerstation
@@ -368,7 +421,6 @@ define Device/ubnt_routerstation
   UBNT_TYPE := RSx
   UBNT_CHIP := ar7100
   DEVICE_PACKAGES += -swconfig
-  SUPPORTED_DEVICES += routerstation
 endef
 TARGET_DEVICES += ubnt_routerstation
 
@@ -378,13 +430,12 @@ define Device/ubnt_routerstation-pro
   UBNT_BOARD := RSPRO
   UBNT_TYPE := RSPRO
   UBNT_CHIP := ar7100pro
-  SUPPORTED_DEVICES += routerstation-pro
 endef
 TARGET_DEVICES += ubnt_routerstation-pro
 
 define Device/ubnt_unifi
   $(Device/ubnt-bz)
-  DEVICE_MODEL := UniFi
+  DEVICE_MODEL := UniFi AP
   SUPPORTED_DEVICES += unifi
 endef
 TARGET_DEVICES += ubnt_unifi
@@ -399,6 +450,7 @@ endef
 define Device/ubnt_unifiac-lite
   $(Device/ubnt_unifiac)
   DEVICE_MODEL := UniFi AC Lite
+  DEVICE_PACKAGES += -swconfig
   SUPPORTED_DEVICES += unifiac-lite
 endef
 TARGET_DEVICES += ubnt_unifiac-lite
@@ -406,6 +458,7 @@ TARGET_DEVICES += ubnt_unifiac-lite
 define Device/ubnt_unifiac-lr
   $(Device/ubnt_unifiac)
   DEVICE_MODEL := UniFi AC LR
+  DEVICE_PACKAGES += -swconfig
   SUPPORTED_DEVICES += unifiac-lite ubnt,unifiac-lite
 endef
 TARGET_DEVICES += ubnt_unifiac-lr
@@ -413,6 +466,7 @@ TARGET_DEVICES += ubnt_unifiac-lr
 define Device/ubnt_unifiac-mesh
   $(Device/ubnt_unifiac)
   DEVICE_MODEL := UniFi AC Mesh
+  DEVICE_PACKAGES += -swconfig
   SUPPORTED_DEVICES += unifiac-lite
 endef
 TARGET_DEVICES += ubnt_unifiac-mesh
