@@ -34,10 +34,5 @@ define Package/xray-plugin
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
 endef
 
-define Package/xray-plugin/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/xray-plugin $(1)/usr/bin/xray-plugin
-endef
-
 $(eval $(call GoBinPackage,xray-plugin))
 $(eval $(call BuildPackage,xray-plugin))
