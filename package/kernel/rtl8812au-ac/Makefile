@@ -1,25 +1,24 @@
+# SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021 ImmortalWrt
-# <https://immortalwrt.org>
+# Copyright (C) 2020 stepheny
+# <https://github.com/aircrack-ng/rtl8812au/pull/619>
 #
-# This is free software, licensed under the GNU General Public License v3.
-# See /LICENSE for more information.
-#
+# Copyright (C) 2021 ImmortalWrt.org
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=rtl8821cu
-PKG_RELEASE:=1
+PKG_NAME:=rtl8812au-ac
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE_URL:=https://github.com/brektrou/rtl8821CU.git
+PKG_SOURCE_URL:=https://github.com/aircrack-ng/rtl8812au.git
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_DATE:=2022-04-09
-PKG_SOURCE_VERSION:=8c2226a74ae718439d56248bd2e44ccf717086d5
-PKG_MIRROR_HASH:=3353a3bc4c73652eceaab95809aab27c3ae8bbf7e915b73488361a061ba91b84
+PKG_SOURCE_DATE:=2021-06-27
+PKG_SOURCE_VERSION:=b8167e66b4ac046b3b76c2c40008d84528e91594
+PKG_MIRROR_HASH:=f3608afb663ccfc796e776bd26b99d9f9cb8dd053bd302eab5c077e498010ce9
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINTER:=CN_SZTL <cnsztl@immortalwrt.org>
+PKG_MAINTAINER:=Marty Jones <mj8263788@gmail.com>
 
 PKG_BUILD_PARALLEL:=1
 
@@ -28,13 +27,13 @@ STAMP_CONFIGURED_DEPENDS := $(STAGING_DIR)/usr/include/mac80211-backport/backpor
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/rtl8821cu
+define KernelPackage/rtl8812au-ac
   SUBMENU:=Wireless Drivers
-  TITLE:=Realtek RTL8811CU/RTL8821CU support
+  TITLE:=Realtek RTL8812AU/21AU wireless drivers
   DEPENDS:=+kmod-cfg80211 +kmod-usb-core +@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT
-  FILES:=$(PKG_BUILD_DIR)/rtl8821cu.ko
-  AUTOLOAD:=$(call AutoProbe,rtl8821cu)
-  PROVIDES:=kmod-rtl8821cu
+  FILES:=$(PKG_BUILD_DIR)/rtl8812au.ko
+  AUTOLOAD:=$(call AutoProbe,rtl8812au)
+  CONFLICTS:=kmod-rtl8812au-ct
 endef
 
 NOSTDINC_FLAGS = \
@@ -48,12 +47,8 @@ NOSTDINC_FLAGS = \
 	-include backport/backport.h
 
 EXTRA_KCONFIG:= \
-	CONFIG_RTL8821CU=m \
-	USER_MODULE_NAME=rtl8821cu
-
-ifeq ($(ARCH),aarch64)
-	EXTRA_KCONFIG += CONFIG_MP_VHT_HW_TX_MODE=n
-endif
+	CONFIG_88XXAU=m \
+	USER_MODULE_NAME=rtl8812au
 
 EXTRA_CFLAGS:= \
 	-DRTW_SINGLE_WIPHY \
@@ -62,8 +57,10 @@ EXTRA_CFLAGS:= \
 	-DCONFIG_CONCURRENT_MODE \
 	-DBUILD_OPENWRT
 
-ifeq ($(BOARD),x86)
-	EXTRA_CFLAGS += -mhard-float
+ifeq ($(CONFIG_BIG_ENDIAN),y)
+EXTRA_CFLAGS += -DCONFIG_BIG_ENDIAN
+else
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
 endif
 
 MAKE_OPTS:= \
@@ -79,4 +76,4 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,rtl8821cu))
+$(eval $(call KernelPackage,rtl8812au-ac))

@@ -1,6 +1,5 @@
 #
 # Copyright (C) 2021 ImmortalWrt
-# <https://immortalwrt.org>
 #
 # This is free software, licensed under the GNU General Public License v3.
 # See /LICENSE for more information.
@@ -8,18 +7,14 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=rtl8821cu
-PKG_RELEASE:=1
+PKG_NAME:=rtl8188eu
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE_URL:=https://github.com/brektrou/rtl8821CU.git
+PKG_SOURCE_URL:=https://github.com/aircrack-ng/rtl8188eus.git
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_DATE:=2022-04-09
-PKG_SOURCE_VERSION:=8c2226a74ae718439d56248bd2e44ccf717086d5
-PKG_MIRROR_HASH:=3353a3bc4c73652eceaab95809aab27c3ae8bbf7e915b73488361a061ba91b84
-
-PKG_LICENSE:=GPL-2.0
-PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINTER:=CN_SZTL <cnsztl@immortalwrt.org>
+PKG_SOURCE_DATE:=2022-03-20
+PKG_SOURCE_VERSION:=0958f294f90b49d6bad4972b14f90676e5d858d3
+PKG_MIRROR_HASH:=dead457e82a8b19a7fa66d7981c5f675e0d8d2d9d297aba5443c793822c22a8f
 
 PKG_BUILD_PARALLEL:=1
 
@@ -28,13 +23,12 @@ STAMP_CONFIGURED_DEPENDS := $(STAGING_DIR)/usr/include/mac80211-backport/backpor
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/rtl8821cu
+define KernelPackage/rtl8188eu
   SUBMENU:=Wireless Drivers
-  TITLE:=Realtek RTL8811CU/RTL8821CU support
-  DEPENDS:=+kmod-cfg80211 +kmod-usb-core +@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT
-  FILES:=$(PKG_BUILD_DIR)/rtl8821cu.ko
-  AUTOLOAD:=$(call AutoProbe,rtl8821cu)
-  PROVIDES:=kmod-rtl8821cu
+  TITLE:=Realtek 8188EU(S)/8188ETV support
+  DEPENDS:=+kmod-cfg80211 +kmod-usb-core +@DRIVER_11N_SUPPORT
+  FILES:=$(PKG_BUILD_DIR)/rtl8188eu.ko
+  AUTOLOAD:=$(call AutoProbe,rtl8188eu)
 endef
 
 NOSTDINC_FLAGS = \
@@ -47,14 +41,6 @@ NOSTDINC_FLAGS = \
 	-include backport/autoconf.h \
 	-include backport/backport.h
 
-EXTRA_KCONFIG:= \
-	CONFIG_RTL8821CU=m \
-	USER_MODULE_NAME=rtl8821cu
-
-ifeq ($(ARCH),aarch64)
-	EXTRA_KCONFIG += CONFIG_MP_VHT_HW_TX_MODE=n
-endif
-
 EXTRA_CFLAGS:= \
 	-DRTW_SINGLE_WIPHY \
 	-DRTW_USE_CFG80211_STA_EVENT \
@@ -62,9 +48,15 @@ EXTRA_CFLAGS:= \
 	-DCONFIG_CONCURRENT_MODE \
 	-DBUILD_OPENWRT
 
-ifeq ($(BOARD),x86)
-	EXTRA_CFLAGS += -mhard-float
+ifeq ($(CONFIG_BIG_ENDIAN),y)
+EXTRA_CFLAGS += -DCONFIG_BIG_ENDIAN
+else
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
 endif
+
+EXTRA_KCONFIG:= \
+	CONFIG_RTL8188EU=m \
+	USER_MODULE_NAME=rtl8188eu
 
 MAKE_OPTS:= \
 	$(KERNEL_MAKE_FLAGS) \
@@ -79,4 +71,4 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,rtl8821cu))
+$(eval $(call KernelPackage,rtl8188eu))
