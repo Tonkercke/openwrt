@@ -1140,10 +1140,10 @@ TARGET_DEVICES += mediatek_mt7621-eval-board
 define Device/mercury_d26g
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
-  IMAGE_SIZE := 16128k
+  IMAGE_SIZE := 16064k
   DEVICE_MODEL := D26G
   DEVICE_VENDOR := Mercury
-  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7615-firmware -wpad-basic-wolfssl
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7615-firmware kmod-usb3 -wpad-basic-wolfssl uboot-envtools
   
 endef
 TARGET_DEVICES += mercury_d26g
