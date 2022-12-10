@@ -27,6 +27,8 @@ endef
 ALLWIFIBOARDS:= \
 	8dev_habanero-dvk \
 	aruba_ap-303 \
+	aruba_ap-365 \
+	asus_rt-ac42u \
 	avm_fritzrepeater-1200 \
 	buffalo_wtr-m2133hp \
 	cellc_rtl30vw \
@@ -41,7 +43,6 @@ ALLWIFIBOARDS:= \
 	glinet_gl-ap1300 \
 	glinet_gl-b2200 \
 	glinet_gl-s1300 \
-	hiwifi_c526a \
 	linksys_ea8300 \
 	linksys_mr8300-v0 \
 	luma_wrtq-329acn \
@@ -53,7 +54,8 @@ ALLWIFIBOARDS:= \
 	qxwlan_e2600ac-c1 \
 	qxwlan_e2600ac-c2 \
 	teltonika_rutx \
-	zte_mf286d
+	zte_mf286d \
+	zte_mf289f
 
 ALLWIFIPACKAGES:=$(foreach BOARD,$(ALLWIFIBOARDS),ipq-wifi-$(BOARD))
 
@@ -132,7 +134,6 @@ $(eval $(call generate-ipq-wifi-package,ezviz_cs-w3-wd1200g-eup,EZVIZ CS-W3-WD12
 $(eval $(call generate-ipq-wifi-package,glinet_gl-ap1300,GL.iNet GL-AP1300))
 $(eval $(call generate-ipq-wifi-package,glinet_gl-b2200,GL.iNet GL-B2200))
 $(eval $(call generate-ipq-wifi-package,glinet_gl-s1300,GL.iNet GL-S1300))
-$(eval $(call generate-ipq-wifi-package,hiwifi_c526a,HiWiFi C526A))
 $(eval $(call generate-ipq-wifi-package,linksys_ea8300,Linksys EA8300))
 $(eval $(call generate-ipq-wifi-package,linksys_mr8300-v0,Linksys MR8300))
 $(eval $(call generate-ipq-wifi-package,luma_wrtq-329acn,Luma WRTQ-329ACN))
@@ -145,5 +146,6 @@ $(eval $(call generate-ipq-wifi-package,qxwlan_e2600ac-c1,Qxwlan E2600AC C1))
 $(eval $(call generate-ipq-wifi-package,qxwlan_e2600ac-c2,Qxwlan E2600AC C2))
 $(eval $(call generate-ipq-wifi-package,teltonika_rutx,Teltonika RUTX))
 $(eval $(call generate-ipq-wifi-package,zte_mf286d,ZTE MF286D))
+$(eval $(call generate-ipq-wifi-package,zte_mf289f,ZTE MF289F))
 
 $(foreach PACKAGE,$(ALLWIFIPACKAGES),$(eval $(call BuildPackage,$(PACKAGE))))
