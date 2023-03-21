@@ -98,7 +98,7 @@
 				compatible = "openwrt,uimage", "denx,uimage";
 				label = "firmware";
 				openwrt,ih-magic = <0x12291000>;
-				reg = <0x50000 0xfb0000>;
+				reg = <0x50000 0x1fb0000>;
 			};
 		};
 	};
