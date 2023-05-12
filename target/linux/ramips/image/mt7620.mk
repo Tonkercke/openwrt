@@ -908,7 +908,7 @@ TARGET_DEVICES += phicomm_k2-v22.5
 
 define Device/phicomm_k2g
   SOC := mt7620a
-  IMAGE_SIZE := 7552k
+  IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Phicomm
   DEVICE_MODEL := K2G
   DEVICE_PACKAGES := kmod-mt76x2
