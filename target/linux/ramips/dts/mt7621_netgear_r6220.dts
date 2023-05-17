@@ -38,7 +38,7 @@
 
 		partition@600000 {
 			label = "ubi";
-			reg = <0x600000 0x1c00000>;
+			reg = <0x600000 0x2800000>;
 		};
 
 		factory: partition@2e00000 {
