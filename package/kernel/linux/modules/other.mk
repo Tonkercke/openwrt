@@ -119,6 +119,24 @@ endef
 $(eval $(call KernelPackage,btmrvl))
 
 
+define KernelPackage/btsdio
+  SUBMENU:=$(OTHER_MENU)
+  TITLE:=Bluetooth HCI SDIO driver
+  DEPENDS:=+kmod-bluetooth +kmod-mmc
+  KCONFIG:= \
+	CONFIG_BT_HCIBTSDIO
+  FILES:= \
+	$(LINUX_DIR)/drivers/bluetooth/btsdio.ko
+  AUTOLOAD:=$(call AutoProbe,btsdio)
+endef
+
+define KernelPackage/btsdio/description
+ Kernel support for Bluetooth device with SDIO interface
+endef
+
+$(eval $(call KernelPackage,btsdio))
+
+
 define KernelPackage/dma-buf
   SUBMENU:=$(OTHER_MENU)
   TITLE:=DMA shared buffer support
@@ -357,7 +375,6 @@ define KernelPackage/mmc
 	CONFIG_MMC_BLOCK \
 	CONFIG_MMC_DEBUG=n \
 	CONFIG_MMC_UNSAFE_RESUME=n \
-	CONFIG_MMC_BLOCK_BOUNCE=y \
 	CONFIG_MMC_TIFM_SD=n \
 	CONFIG_MMC_WBSD=n \
 	CONFIG_SDIO_UART=n
@@ -372,23 +389,6 @@ define KernelPackage/mmc/description
 endef
 
 $(eval $(call KernelPackage,mmc))
-
-
-define KernelPackage/mvsdio
-  SUBMENU:=$(OTHER_MENU)
-  TITLE:=Marvell MMC/SD/SDIO host driver
-  DEPENDS:=+kmod-mmc @TARGET_kirkwood
-  KCONFIG:= CONFIG_MMC_MVSDIO
-  FILES:= \
-	$(LINUX_DIR)/drivers/mmc/host/mvsdio.ko
-  AUTOLOAD:=$(call AutoProbe,mvsdio,1)
-endef
-
-define KernelPackage/mvsdio/description
- Kernel support for the Marvell SDIO host driver.
-endef
-
-$(eval $(call KernelPackage,mvsdio))
 
 
 define KernelPackage/sdhci
