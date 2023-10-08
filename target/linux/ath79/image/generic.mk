@@ -591,12 +591,19 @@ endef
 TARGET_DEVICES += buffalo_wzr-hp-g450h
 
 define Device/comfast_cf-e110n-v2
+  $(Device/loader-okli-uimage)
   SOC := qca9533
   DEVICE_VENDOR := COMFAST
   DEVICE_MODEL := CF-E110N
   DEVICE_VARIANT := v2
   DEVICE_PACKAGES := rssileds -swconfig -uboot-envtools
-  IMAGE_SIZE := 16192k
+  IMAGE_SIZE := 15936k
+  LOADER_FLASH_OFFS := 0x50000
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
+	append-rootfs | pad-rootfs | check-size | pad-to 14528k | \
+	append-loader-okli-uimage $(1) | pad-to 64k
 endef
 TARGET_DEVICES += comfast_cf-e110n-v2
 
