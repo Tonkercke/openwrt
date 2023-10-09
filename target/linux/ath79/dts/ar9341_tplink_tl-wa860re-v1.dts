@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 
-#include "ar9341_tplink_tl-wa.dtsi"
+#include "ar9341_tplink.dtsi"
 
 / {
 	model = "TP-Link TL-WA860RE v1";
@@ -20,20 +20,6 @@
 			label = "Reset";
 			linux,code = <KEY_RESTART>;
 			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
-			debounce-interval = <60>;
-		};
-
-		wps {
-			label = "WPS";
-			linux,code = <KEY_WPS_BUTTON>;
-			gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
-			debounce-interval = <60>;
-		};
-
-		onoff {
-			label = "ONOFF";
-			linux,code = <BTN_1>;
-			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
 			debounce-interval = <60>;
 		};
 	};
