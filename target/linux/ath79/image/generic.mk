@@ -602,7 +602,7 @@ define Device/comfast_cf-e110n-v2
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
   IMAGES += factory.bin
   IMAGE/factory.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
-	append-rootfs | pad-rootfs | check-size | pad-to 14528k | \
+	append-rootfs | pad-rootfs | check-size | pad-to $$$$(BLOCKSIZE) | \
 	append-loader-okli-uimage $(1) | pad-to 64k
 endef
 TARGET_DEVICES += comfast_cf-e110n-v2
@@ -628,12 +628,19 @@ endef
 TARGET_DEVICES += comfast_cf-e130n-v2
 
 define Device/comfast_cf-e313ac
+  $(Device/loader-okli-uimage)
   SOC := qca9531
   DEVICE_VENDOR := COMFAST
   DEVICE_MODEL := CF-E313AC
   DEVICE_PACKAGES := rssileds kmod-ath10k-ct-smallbuffers \
 	ath10k-firmware-qca9888-ct -swconfig -uboot-envtools
   IMAGE_SIZE := 7936k
+  LOADER_FLASH_OFFS := 0x50000
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
+	append-rootfs | pad-rootfs | check-size | pad-to $$$$(BLOCKSIZE) | \
+	append-loader-okli-uimage $(1) | pad-to 64k
 endef
 TARGET_DEVICES += comfast_cf-e313ac
 
@@ -649,7 +656,7 @@ define Device/comfast_cf-e314n-v2
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
   IMAGES += factory.bin
   IMAGE/factory.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
-	append-rootfs | pad-rootfs | check-size | pad-to 14528k | \
+	append-rootfs | pad-rootfs | check-size | pad-to $$$$(BLOCKSIZE) | \
 	append-loader-okli-uimage $(1) | pad-to 64k
 endef
 TARGET_DEVICES += comfast_cf-e314n-v2
