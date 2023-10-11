@@ -757,6 +757,16 @@ define Device/tplink_tl-wr710n-v2.1
 endef
 TARGET_DEVICES += tplink_tl-wr710n-v2.1
 
+define Device/tplink_tl-wr800n-v1
+  $(Device/tplink-16mlzma)
+  SOC := ar9341
+  DEVICE_MODEL := TL-WR800N
+  DEVICE_VARIANT := v1
+  TPLINK_HWID := 0x8000001
+  SUPPORTED_DEVICES += tl-wr800n-v1
+endef
+TARGET_DEVICES += tplink_tl-wr800n-v1
+
 define Device/tplink_tl-wr810n-v1
   $(Device/tplink-8mlzma)
   SOC := qca9531
