@@ -6,8 +6,14 @@ on:
       target:
         required: true
         type: string
+      subtarget:
+        required: true
+        type: string
       testing:
         type: boolean
+      use_openwrt_container:
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -26,6 +32,11 @@ jobs:
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" \
             | tr '[:upper:]' '[:lower:]')
+
+          if [ ${{ inputs.use_openwrt_container }} == "true" ]; then
+            OWNER_LC=openwrt
+          fi
+
           echo "owner_lc=$OWNER_LC" >> $GITHUB_OUTPUT
 
       # Per branch tools container tag
@@ -77,17 +88,15 @@ jobs:
         run: |
           chown -R buildbot:buildbot openwrt
 
-      - name: Initialization environment
-        run: |
-          TARGET=$(echo ${{ inputs.target }} | cut -d "/" -f 1)
-          SUBTARGET=$(echo ${{ inputs.target }} | cut -d "/" -f 2)
-          echo "TARGET=$TARGET" >> "$GITHUB_ENV"
-          echo "SUBTARGET=$SUBTARGET" >> "$GITHUB_ENV"
-
-      - name: Extract prebuilt tools
+      - name: Prepare prebuilt tools
         shell: su buildbot -c "sh -e {0}"
         working-directory: openwrt
-        run: ./scripts/ext-tools.sh --tools /tools.tar
+        run: |
+          mkdir -p staging_dir build_dir
+          ln -sf /prebuilt_tools/staging_dir/host staging_dir/host
+          ln -sf /prebuilt_tools/build_dir/host build_dir/host
+
+          ./scripts/ext-tools.sh --refresh
 
       - name: Configure testing kernel
         if: inputs.testing == true
@@ -105,8 +114,8 @@ jobs:
           echo CONFIG_AUTOREMOVE=y >> .config
           echo CONFIG_CCACHE=y >> .config
 
-          echo "CONFIG_TARGET_${{ env.TARGET }}=y" >> .config
-          echo "CONFIG_TARGET_${{ env.TARGET }}_${{ env.SUBTARGET }}=y" >> .config
+          echo "CONFIG_TARGET_${{ inputs.target }}=y" >> .config
+          echo "CONFIG_TARGET_${{ inputs.target }}_${{ inputs.subtarget }}=y" >> .config
 
           make defconfig
 
@@ -118,14 +127,29 @@ jobs:
       - name: Refresh Kernel patches
         shell: su buildbot -c "sh -e {0}"
         working-directory: openwrt
-        run: |
-          make target/linux/refresh V=s
+        run: make target/linux/refresh V=s
 
+      - name: Validate Refreshed Kernel Patches
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
           . .github/workflows/scripts/ci_helpers.sh
 
           if git diff --name-only --exit-code; then
-            success "Kernel patches for ${{ env.TARGET }}/${{ env.SUBTARGET }} seems ok"
+            success "Kernel patches for ${{ inputs.target }}/${{ inputs.subtarget }} seems ok"
           else
-            err "Kernel patches for ${{ env.TARGET }}/${{ env.SUBTARGET }} require refresh. (run 'make target/linux/refresh' and force push this pr)"
+            err "Kernel patches for ${{ inputs.target }}/${{ inputs.subtarget }} require refresh. (run 'make target/linux/refresh' and force push this pr)"
+            err "You can also check the provided artifacts with the refreshed patch from this CI run."
+            mkdir ${{ inputs.target }}-${{ inputs.subtarget }}-refreshed
+            for f in $(git diff --name-only); do
+              cp --parents $f ${{ inputs.target }}-${{ inputs.subtarget }}-refreshed/
+            done
             exit 1
           fi
+
+      - name: Upload Refreshed Patches
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.target }}-${{ inputs.subtarget }}-refreshed
+          path: openwrt/${{ inputs.target }}-${{ inputs.subtarget }}-refreshed

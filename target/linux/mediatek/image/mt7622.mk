@@ -1,11 +1,5 @@
 DTS_DIR := $(DTS_DIR)/mediatek
 
-ifdef CONFIG_LINUX_5_4
-  KERNEL_LOADADDR := 0x44080000
-else
-  KERNEL_LOADADDR := 0x44000000
-endif
-
 define Image/Prepare
 	# For UBI we want only one extra block
 	rm -f $(KDIR)/ubi_mark
@@ -76,6 +70,8 @@ define Device/bananapi_bpi-r64
   DEVICE_DTS := mt7622-bananapi-bpi-r64
   DEVICE_DTS_OVERLAY := mt7622-bananapi-bpi-r64-pcie1 mt7622-bananapi-bpi-r64-sata
   DEVICE_PACKAGES := kmod-ata-ahci-mtk kmod-btmtkuart kmod-usb3 e2fsprogs mkf2fs f2fsck
+  DEVICE_DTC_FLAGS := --pad 4096
+  DEVICE_DTS_LOADADDR := 0x43f00000
   ARTIFACTS := emmc-preloader.bin emmc-bl31-uboot.fip sdcard.img.gz snand-preloader.bin snand-bl31-uboot.fip
   IMAGES := sysupgrade.itb
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
@@ -94,13 +90,16 @@ define Device/bananapi_bpi-r64
 				   pad-to 40960k | bl31-uboot bananapi_bpi-r64-emmc |\
 				   pad-to 43008k | bl2 snand-2ddr |\
 				   pad-to 43520k | bl31-uboot bananapi_bpi-r64-snand |\
-				$(if $(CONFIG_TARGET_ROOTFS_SQUASHFS),\
-				   pad-to 46080k | append-image squashfs-sysupgrade.itb | check-size | gzip \
-				)
+				$(if $(CONFIG_TARGET_ROOTFS_SQUASHFS), \
+				   pad-to 46080k | append-image squashfs-sysupgrade.itb | check-size |\
+				) \
+				  gzip
   IMAGE_SIZE := $$(shell expr 45 + $$(CONFIG_TARGET_ROOTFS_PARTSIZE))m
   KERNEL			:= kernel-bin | gzip
   KERNEL_INITRAMFS		:= kernel-bin | lzma | fit lzma $$(DTS_DIR)/$$(DEVICE_DTS).dtb with-initrd | pad-to 128k
   IMAGE/sysupgrade.itb		:= append-kernel | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb external-static-with-rootfs | append-metadata
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Device tree overlay mechanism needs bootloader update
 endef
 TARGET_DEVICES += bananapi_bpi-r64
 
@@ -129,7 +128,7 @@ define Device/buffalo_wsr-2533dhp2
   IMAGE/sysupgrade.bin := append-kernel | \
 	buffalo-kernel-trx 0x32504844 $(KDIR)/tmp/$$(DEVICE_NAME).null | \
 	sysupgrade-tar kernel=$$$$@ | append-metadata
-  DEVICE_PACKAGES := swconfig
+  DEVICE_PACKAGES := kmod-mt7615-firmware swconfig
 endef
 TARGET_DEVICES += buffalo_wsr-2533dhp2
 
@@ -138,9 +137,29 @@ define Device/elecom_wrc-2533gent
   DEVICE_MODEL := WRC-2533GENT
   DEVICE_DTS := mt7622-elecom-wrc-2533gent
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-btmtkuart kmod-usb3 swconfig
+  DEVICE_PACKAGES := kmod-btmtkuart kmod-mt7615-firmware kmod-usb3 swconfig
 endef
 TARGET_DEVICES += elecom_wrc-2533gent
+
+define Device/elecom_wrc-x3200gst3
+  DEVICE_VENDOR := ELECOM
+  DEVICE_MODEL := WRC-X3200GST3
+  DEVICE_DTS := mt7622-elecom-wrc-x3200gst3
+  DEVICE_DTS_DIR := ../dts
+  IMAGE_SIZE := 25600k
+  KERNEL_SIZE := 6144k
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  UBINIZE_OPTS := -E 5
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | \
+	append-ubi | check-size | \
+	elecom-wrc-gs-factory WRC-X3200GST3 0.00 -N | \
+	append-string MT7622_ELECOM_WRC-X3200GST3
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_PACKAGES := kmod-mt7915-firmware
+endef
+TARGET_DEVICES += elecom_wrc-x3200gst3
 
 define Device/linksys_e8450
   DEVICE_VENDOR := Linksys
@@ -149,7 +168,7 @@ define Device/linksys_e8450
   DEVICE_ALT0_MODEL := RT3200
   DEVICE_DTS := mt7622-linksys-e8450
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-usb3
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3
 endef
 TARGET_DEVICES += linksys_e8450
 
@@ -162,7 +181,7 @@ define Device/linksys_e8450-ubi
   DEVICE_ALT0_VARIANT := UBI
   DEVICE_DTS := mt7622-linksys-e8450-ubi
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-usb3
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
@@ -208,21 +227,57 @@ define Device/mediatek_mt7622-rfb1-ubi
 endef
 TARGET_DEVICES += mediatek_mt7622-rfb1-ubi
 
+define Device/netgear_wax206
+  $(Device/dsa-migration)
+  DEVICE_VENDOR := NETGEAR
+  DEVICE_MODEL := WAX206
+  DEVICE_DTS := mt7622-netgear-wax206
+  DEVICE_DTS_DIR := ../dts
+  NETGEAR_ENC_MODEL := WAX206
+  NETGEAR_ENC_REGION := US
+  DEVICE_PACKAGES := kmod-mt7915-firmware
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 6144k
+  IMAGE_SIZE := 32768k
+  KERNEL := kernel-bin | lzma | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb | \
+	append-squashfs4-fakeroot
+# recovery can also be used with stock firmware web-ui, hence the padding...
+  KERNEL_INITRAMFS := kernel-bin | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 128k
+  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
+  IMAGES += factory.img
+  IMAGE/factory.img := append-kernel | pad-to $$(KERNEL_SIZE) | \
+	append-ubi | check-size | netgear-encrypted-factory
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += netgear_wax206
+
 define Device/ruijie_rg-ew3200gx-pro
   DEVICE_VENDOR := Ruijie
   DEVICE_MODEL := RG-EW3200GX PRO
   DEVICE_DTS := mt7622-ruijie-rg-ew3200gx-pro
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e
+  DEVICE_PACKAGES := kmod-mt7915-firmware
 endef
 TARGET_DEVICES += ruijie_rg-ew3200gx-pro
+
+define Device/reyee_ax3200-e5
+  DEVICE_VENDOR := reyee
+  DEVICE_MODEL := AX3200 E5
+  DEVICE_DTS := mt7622-reyee-ax3200-e5
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915-firmware
+endef
+TARGET_DEVICES += reyee_ax3200-e5
 
 define Device/totolink_a8000ru
   DEVICE_VENDOR := TOTOLINK
   DEVICE_MODEL := A8000RU
   DEVICE_DTS := mt7622-totolink-a8000ru
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := swconfig
+  DEVICE_PACKAGES := kmod-mt7615-firmware swconfig
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += totolink_a8000ru
@@ -234,7 +289,7 @@ define Device/ubnt_unifi-6-lr-v1
   DEVICE_DTS_CONFIG := config@1
   DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v1
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-leds-ubnt-ledbar
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-leds-ubnt-ledbar
   SUPPORTED_DEVICES += ubnt,unifi-6-lr
 endef
 TARGET_DEVICES += ubnt_unifi-6-lr-v1
@@ -245,7 +300,7 @@ define Device/ubnt_unifi-6-lr-v1-ubootmod
   DEVICE_VARIANT := v1 U-Boot mod
   DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v1-ubootmod
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-leds-ubnt-ledbar
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-leds-ubnt-ledbar
   KERNEL := kernel-bin | lzma
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   KERNEL_INITRAMFS := kernel-bin | lzma | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
@@ -253,7 +308,7 @@ define Device/ubnt_unifi-6-lr-v1-ubootmod
   IMAGE/sysupgrade.itb := append-kernel | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | pad-rootfs | append-metadata
   ARTIFACTS := preloader.bin bl31-uboot.fip
   ARTIFACT/preloader.bin := bl2 nor-2ddr
-  ARTIFACT/bl31-uboot.fip := bl31-uboot ubnt_unifi-6-lr
+  ARTIFACT/bl31-uboot.fip := bl31-uboot ubnt_unifi-6-lr-v1
   SUPPORTED_DEVICES += ubnt,unifi-6-lr-ubootmod
 endef
 TARGET_DEVICES += ubnt_unifi-6-lr-v1-ubootmod
@@ -265,7 +320,7 @@ define Device/ubnt_unifi-6-lr-v2
   DEVICE_DTS_CONFIG := config@1
   DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v2
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e
+  DEVICE_PACKAGES := kmod-mt7915-firmware
 endef
 TARGET_DEVICES += ubnt_unifi-6-lr-v2
 
@@ -275,7 +330,7 @@ define Device/ubnt_unifi-6-lr-v2-ubootmod
   DEVICE_VARIANT := v2 U-Boot mod
   DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v2-ubootmod
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e
+  DEVICE_PACKAGES := kmod-mt7915-firmware
   KERNEL := kernel-bin | lzma
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   KERNEL_INITRAMFS := kernel-bin | lzma | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
@@ -283,9 +338,38 @@ define Device/ubnt_unifi-6-lr-v2-ubootmod
   IMAGE/sysupgrade.itb := append-kernel | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | pad-rootfs | append-metadata
   ARTIFACTS := preloader.bin bl31-uboot.fip
   ARTIFACT/preloader.bin := bl2 nor-2ddr
-  ARTIFACT/bl31-uboot.fip := bl31-uboot ubnt_unifi-6-lr
+  ARTIFACT/bl31-uboot.fip := bl31-uboot ubnt_unifi-6-lr-v2
 endef
 TARGET_DEVICES += ubnt_unifi-6-lr-v2-ubootmod
+
+define Device/ubnt_unifi-6-lr-v3
+  DEVICE_VENDOR := Ubiquiti
+  DEVICE_MODEL := UniFi 6 LR
+  DEVICE_VARIANT := v3
+  DEVICE_DTS_CONFIG := config@1
+  DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v3
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915-firmware
+endef
+TARGET_DEVICES += ubnt_unifi-6-lr-v3
+
+define Device/ubnt_unifi-6-lr-v3-ubootmod
+  DEVICE_VENDOR := Ubiquiti
+  DEVICE_MODEL := UniFi 6 LR
+  DEVICE_VARIANT := v3 U-Boot mod
+  DEVICE_DTS := mt7622-ubnt-unifi-6-lr-v3-ubootmod
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915-firmware
+  KERNEL := kernel-bin | lzma
+  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
+  KERNEL_INITRAMFS := kernel-bin | lzma | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
+  IMAGES := sysupgrade.itb
+  IMAGE/sysupgrade.itb := append-kernel | fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | pad-rootfs | append-metadata
+  ARTIFACTS := preloader.bin bl31-uboot.fip
+  ARTIFACT/preloader.bin := bl2 nor-2ddr
+  ARTIFACT/bl31-uboot.fip := bl31-uboot ubnt_unifi-6-lr-v3
+endef
+TARGET_DEVICES += ubnt_unifi-6-lr-v3-ubootmod
 
 define Device/xiaomi_redmi-router-ax6s
   DEVICE_VENDOR := Xiaomi
@@ -295,7 +379,7 @@ define Device/xiaomi_redmi-router-ax6s
   DEVICE_DTS := mt7622-xiaomi-redmi-router-ax6s
   DEVICE_DTS_DIR := ../dts
   BOARD_NAME := xiaomi,redmi-router-ax6s
-  DEVICE_PACKAGES := kmod-mt7915e
+  DEVICE_PACKAGES := kmod-mt7915-firmware
   UBINIZE_OPTS := -E 5
   IMAGES += factory.bin
   BLOCKSIZE := 128k

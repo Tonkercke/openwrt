@@ -20,6 +20,7 @@
 #include <linux/of_device.h>
 #include <linux/of_fdt.h>
 #include <linux/libfdt.h>
+#include <linux/version.h>
 
 #include "check.h"
 
@@ -72,7 +73,8 @@
 
 int parse_fit_partitions(struct parsed_partitions *state, u64 fit_start_sector, u64 sectors, int *slot, int add_remain)
 {
-	struct address_space *mapping = state->bdev->bd_inode->i_mapping;
+	struct block_device *bdev = state->disk->part0;
+	struct address_space *mapping = bdev->bd_inode->i_mapping;
 	struct page *page;
 	void *fit, *init_fit;
 	struct partition_meta_info *info;
@@ -82,13 +84,13 @@ int parse_fit_partitions(struct parsed_partitions *state, u64 fit_start_sector, 
 	const u32 *image_offset_be, *image_len_be, *image_pos_be;
 	int ret = 1, node, images, config;
 	const char *image_name, *image_type, *image_description, *config_default,
-		*config_description, *config_loadables;
+		*config_description, *config_loadables, *bootconf_c;
 	int image_name_len, image_type_len, image_description_len, config_default_len,
-		config_description_len, config_loadables_len;
+		config_description_len, config_loadables_len, bootconf_len;
 	sector_t start_sect, nr_sects;
 	size_t label_min;
 	struct device_node *np = NULL;
-	const char *bootconf;
+	char *bootconf = NULL, *bootconf_term;
 	const char *loadable;
 	const char *select_rootfs = NULL;
 	bool found;
@@ -116,7 +118,7 @@ int parse_fit_partitions(struct parsed_partitions *state, u64 fit_start_sector, 
 		return 0;
 	}
 
-	dsectors = get_capacity(state->bdev->bd_disk);
+	dsectors = get_capacity(bdev->bd_disk);
 	if (sectors)
 		dsectors = (dsectors>sectors)?sectors:dsectors;
 
@@ -141,10 +143,17 @@ int parse_fit_partitions(struct parsed_partitions *state, u64 fit_start_sector, 
 		return -ENOMEM;
 
 	np = of_find_node_by_path("/chosen");
-	if (np)
-		bootconf = of_get_property(np, "bootconf", NULL);
-	else
-		bootconf = NULL;
+	if (np) {
+		bootconf_c = of_get_property(np, "u-boot,bootconf", &bootconf_len);
+		if (bootconf_c && bootconf_len)
+			bootconf = kmemdup_nul(bootconf_c, bootconf_len, GFP_KERNEL);
+	}
+
+	if (bootconf) {
+		bootconf_term = strchr(bootconf, '#');
+		if (bootconf_term)
+			*bootconf_term = '\0';
+	}
 
 	config = fdt_path_offset(fit, FIT_CONFS_PATH);
 	if (config < 0) {
@@ -283,6 +292,7 @@ int parse_fit_partitions(struct parsed_partitions *state, u64 fit_start_sector, 
 		strlcat(state->pp_buf, tmp, PAGE_SIZE);
 	}
 ret_out:
+	kfree(bootconf);
 	kfree(fit);
 	return ret;
 }

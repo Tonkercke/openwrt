@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=restool
 PKG_VERSION:=21.08
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/nxp-qoriq/restool

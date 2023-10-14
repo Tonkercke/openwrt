@@ -109,7 +109,7 @@ $(foreach t,$(DEFAULT_SUBDIR_TARGETS) $(1),
 )
 endef
 
-DL_DIR:=$(if $(call qstrip,$(CONFIG_DOWNLOAD_FOLDER)),$(call qstrip,$(CONFIG_DOWNLOAD_FOLDER)),$(TOPDIR)/dl)
+DL_DIR=$(if $(call qstrip,$(CONFIG_DOWNLOAD_FOLDER)),$(call qstrip,$(CONFIG_DOWNLOAD_FOLDER)),$(TOPDIR)/dl)$(if $(DL_SUBDIR),/$(DL_SUBDIR))
 OUTPUT_DIR:=$(if $(call qstrip,$(CONFIG_BINARY_FOLDER)),$(call qstrip,$(CONFIG_BINARY_FOLDER)),$(TOPDIR)/bin)
 BIN_DIR:=$(OUTPUT_DIR)/targets/$(BOARD)/$(SUBTARGET)
 INCLUDE_DIR:=$(TOPDIR)/include
@@ -156,8 +156,8 @@ BUILD_LOG_DIR:=$(if $(call qstrip,$(CONFIG_BUILD_LOG_DIR)),$(call qstrip,$(CONFI
 PKG_INFO_DIR := $(STAGING_DIR)/pkginfo
 
 BUILD_DIR_HOST:=$(if $(IS_PACKAGE_BUILD),$(BUILD_DIR_BASE)/hostpkg,$(BUILD_DIR_BASE)/host)
-STAGING_DIR_HOST:=$(TOPDIR)/staging_dir/host
-STAGING_DIR_HOSTPKG:=$(TOPDIR)/staging_dir/hostpkg
+STAGING_DIR_HOST:=$(abspath $(STAGING_DIR)/../host)
+STAGING_DIR_HOSTPKG:=$(abspath $(STAGING_DIR)/../hostpkg)
 
 TARGET_PATH:=$(subst $(space),:,$(filter-out .,$(filter-out ./,$(subst :,$(space),$(PATH)))))
 TARGET_INIT_PATH:=$(call qstrip,$(CONFIG_TARGET_INIT_PATH))
@@ -184,7 +184,7 @@ ifndef DUMP
     -include $(TOOLCHAIN_DIR)/info.mk
     export GCC_HONOUR_COPTS:=0
     TARGET_CROSS:=$(if $(TARGET_CROSS),$(TARGET_CROSS),$(OPTIMIZE_FOR_CPU)-openwrt-linux$(if $(TARGET_SUFFIX),-$(TARGET_SUFFIX))-)
-    TARGET_CFLAGS+= -fhonour-copts -Wno-error=unused-but-set-variable -Wno-error=unused-result
+    TARGET_CFLAGS+= -fhonour-copts
     TARGET_CPPFLAGS+= -I$(TOOLCHAIN_DIR)/usr/include
     ifeq ($(CONFIG_USE_MUSL),y)
       TARGET_CPPFLAGS+= -I$(TOOLCHAIN_DIR)/include/fortify
@@ -227,6 +227,7 @@ else
   endif
 endif
 
+export ORIG_PATH:=$(if $(ORIG_PATH),$(ORIG_PATH),$(PATH))
 export PATH:=$(TARGET_PATH)
 export STAGING_DIR STAGING_DIR_HOST STAGING_DIR_HOSTPKG
 export SH_FUNC:=. $(INCLUDE_DIR)/shell.sh;
@@ -252,14 +253,12 @@ TARGET_NM:=$(TARGET_CROSS)gcc-nm
 TARGET_CC:=$(TARGET_CROSS)gcc
 TARGET_CXX:=$(TARGET_CROSS)g++
 KPATCH:=$(SCRIPT_DIR)/patch-kernel.sh
+FILECMD:=$(STAGING_DIR_HOST)/bin/file
 SED:=$(STAGING_DIR_HOST)/bin/sed -i -e
 ESED:=$(STAGING_DIR_HOST)/bin/sed -E -i -e
 MKHASH:=$(STAGING_DIR_HOST)/bin/mkhash
 # MKHASH is used in /scripts, so we export it here.
 export MKHASH
-# DOWNLOAD_CHECK_CERTIFICATE is used in /scripts, so we export it here.
-DOWNLOAD_CHECK_CERTIFICATE:=$(CONFIG_DOWNLOAD_CHECK_CERTIFICATE)
-export DOWNLOAD_CHECK_CERTIFICATE
 CP:=cp -fpR
 LN:=ln -sf
 XARGS:=xargs -r
@@ -269,6 +268,14 @@ TAR:=tar
 FIND:=find
 PATCH:=patch
 PYTHON:=python3
+
+ifeq ($(HOST_OS),Darwin)
+  TRUE:=/usr/bin/env gtrue
+  FALSE:=/usr/bin/env gfalse
+else
+  TRUE:=/usr/bin/env true
+  FALSE:=/usr/bin/env false
+endif
 
 INSTALL_BIN:=install -m0755
 INSTALL_SUID:=install -m4755
@@ -286,8 +293,8 @@ export HOSTCC_NOCACHE
 export HOSTCXX_NOCACHE
 
 ifneq ($(CONFIG_CCACHE),)
-  TARGET_CC:= ccache_cc
-  TARGET_CXX:= ccache_cxx
+  TARGET_CC:= ccache $(TARGET_CC)
+  TARGET_CXX:= ccache $(TARGET_CXX)
   HOSTCC:= ccache $(HOSTCC)
   HOSTCXX:= ccache $(HOSTCXX)
   export CCACHE_BASEDIR:=$(TOPDIR)
@@ -352,6 +359,7 @@ ifeq ($(CONFIG_BUILD_LOG),y)
 endif
 
 export BISON_PKGDATADIR:=$(STAGING_DIR_HOST)/share/bison
+export HOST_GNULIB_SRCDIR:=$(STAGING_DIR_HOST)/share/gnulib
 export M4:=$(STAGING_DIR_HOST)/bin/m4
 
 define shvar

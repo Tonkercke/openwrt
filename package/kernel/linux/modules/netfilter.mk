@@ -1,6 +1,6 @@
 
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2023 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -39,6 +39,17 @@ endef
 
 $(eval $(call KernelPackage,nf-reject6))
 
+define KernelPackage/nf-conncount
+  SUBMENU:=$(NF_MENU)
+  TITLE:=Netfilter conncount support
+  KCONFIG:=$(KCONFIG_NF_CONNCOUNT)
+  HIDDEN:=1
+  DEPENDS:=+kmod-nf-conntrack
+  FILES:=$(foreach mod,$(NF_CONNCOUNT-m),$(LINUX_DIR)/net/$(mod).ko)
+  AUTOLOAD:=$(call AutoProbe,$(notdir $(NF_CONNCOUNT-m)))
+endef
+
+$(eval $(call KernelPackage,nf-conncount))
 
 define KernelPackage/nf-ipt
   SUBMENU:=$(NF_MENU)
@@ -176,9 +187,7 @@ define KernelPackage/nf-flow
 	CONFIG_NF_FLOW_TABLE \
 	CONFIG_NF_FLOW_TABLE_HW
   DEPENDS:=+kmod-nf-conntrack
-  FILES:= \
-	$(LINUX_DIR)/net/netfilter/nf_flow_table.ko \
-	$(if $(CONFIG_LINUX_5_4),$(LINUX_DIR)/net/netfilter/nf_flow_table_hw.ko)
+  FILES:= $(LINUX_DIR)/net/netfilter/nf_flow_table.ko
   AUTOLOAD:=$(call AutoProbe,nf_flow_table nf_flow_table_hw)
 endef
 
@@ -236,6 +245,7 @@ $(eval $(call KernelPackage,ipt-conntrack))
 
 define KernelPackage/ipt-conntrack-extra
   TITLE:=Extra connection tracking modules
+  DEPENDS:=+kmod-nf-conncount
   KCONFIG:=$(KCONFIG_IPT_CONNTRACK_EXTRA)
   FILES:=$(foreach mod,$(IPT_CONNTRACK_EXTRA-m),$(LINUX_DIR)/net/$(mod).ko)
   AUTOLOAD:=$(call AutoProbe,$(notdir $(IPT_CONNTRACK_EXTRA-m)))
@@ -1131,11 +1141,30 @@ define KernelPackage/nft-bridge
   FILES:=$(foreach mod,$(NFT_BRIDGE-m),$(LINUX_DIR)/net/$(mod).ko)
   AUTOLOAD:=$(call AutoProbe,$(notdir $(NFT_BRIDGE-m)))
   KCONFIG:= \
-	CONFIG_NF_LOG_BRIDGE=n \
 	$(KCONFIG_NFT_BRIDGE)
 endef
 
 $(eval $(call KernelPackage,nft-bridge))
+
+
+define KernelPackage/nft-dup-inet
+  SUBMENU:=$(NF_MENU)
+  TITLE:=Netfilter nf_tables dup in ip/ip6/inet family support
+  DEPENDS:=+kmod-nft-core +kmod-nf-conntrack +IPV6:kmod-nf-conntrack6
+  KCONFIG:= \
+	CONFIG_NF_DUP_IPV4 \
+	CONFIG_NF_DUP_IPV6 \
+	CONFIG_NFT_DUP_IPV4 \
+	CONFIG_NFT_DUP_IPV6
+  FILES:= \
+	$(LINUX_DIR)/net/ipv4/netfilter/nf_dup_ipv4.ko \
+	$(LINUX_DIR)/net/ipv6/netfilter/nf_dup_ipv6.ko \
+	$(LINUX_DIR)/net/ipv4/netfilter/nft_dup_ipv4.ko \
+	$(LINUX_DIR)/net/ipv6/netfilter/nft_dup_ipv6.ko
+  AUTOLOAD:=$(call AutoProbe,nf_dup_ipv4 nf_dup_ipv6 nft_dup_ipv4 nft_dup_ipv6)
+endef
+
+$(eval $(call KernelPackage,nft-dup-inet))
 
 
 define KernelPackage/nft-nat
@@ -1256,3 +1285,14 @@ define KernelPackage/nft-xfrm
 endef
 
 $(eval $(call KernelPackage,nft-xfrm))
+
+define KernelPackage/nft-connlimit
+  SUBMENU:=$(NF_MENU)
+  TITLE:=Netfilter nf_tables connlimit support
+  DEPENDS:=+kmod-nft-core +kmod-nf-conncount
+  FILES:=$(foreach mod,$(NFT_CONNLIMIT-m),$(LINUX_DIR)/net/$(mod).ko)
+  AUTOLOAD:=$(call AutoProbe,$(notdir $(NFT_CONNLIMIT-m)))
+  KCONFIG:=$(KCONFIG_NFT_CONNLIMIT)
+endef
+
+$(eval $(call KernelPackage,nft-connlimit))

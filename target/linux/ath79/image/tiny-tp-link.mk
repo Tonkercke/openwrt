@@ -162,7 +162,7 @@ endef
 TARGET_DEVICES += tplink_tl-wa850re-v2
 
 define Device/tplink_tl-wa860re-v1
-  $(Device/tplink-16mlzma)
+  $(Device/tplink-4mlzma)
   SOC := ar9341
   DEVICE_MODEL := TL-WA860RE
   DEVICE_VARIANT := v1
@@ -503,6 +503,16 @@ define Device/tplink_tl-wr941-v4
   SUPPORTED_DEVICES += tl-wr741nd
 endef
 TARGET_DEVICES += tplink_tl-wr941-v4
+
+define Device/tplink_tl-wr941nd-v5
+  $(Device/tplink-4mlzma)
+  SOC := ar9341
+  DEVICE_MODEL := TL-WR941ND
+  DEVICE_VARIANT := v5
+  TPLINK_HWID := 0x09410005
+  SUPPORTED_DEVICES += tl-wr941nd-v5
+endef
+TARGET_DEVICES += tplink_tl-wr941nd-v5
 
 define Device/tplink_tl-wr941nd-v6
   $(Device/tplink-4mlzma)

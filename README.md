@@ -1,6 +1,6 @@
 openwrt
 =
-Version:22.03-2023-0405
+Version:23.05
 
 Compilation steps:
 

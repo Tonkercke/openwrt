@@ -21,7 +21,7 @@ PKG_FIXUP:=autoreconf
 PKG_LICENSE:=GPL-2.0-or-later
 PKG_CPE_ID:=cpe:/a:gmplib:gmp
 
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk

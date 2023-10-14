@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=util-linux
-PKG_VERSION:=2.37.4
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_VERSION:=2.39
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=@KERNEL/linux/utils/$(PKG_NAME)/v2.37
-PKG_HASH:=634e6916ad913366c3536b6468e7844769549b99a7b2bf80314de78ab5655b83
+PKG_SOURCE_URL:=@KERNEL/linux/utils/$(PKG_NAME)/v2.39
+PKG_HASH:=32b30a336cda903182ed61feb3e9b908b762a5e66fe14e43efb88d37162075cb
 PKG_CPE_ID:=cpe:/a:kernel:util-linux
 
 PKG_LICENSE:=GPL-2.0-only
@@ -25,14 +25,10 @@ PKG_LICENSE_FILES:=	COPYING					\
 			libuuid/COPYING				\
 			Documentation/licenses/COPYING.BSD-3
 
-PKG_BUILD_PARALLEL:=1
-
-PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 
-DISABLE_NLS:=--disable-nls
-
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/meson.mk
 
 define Package/util-linux/Default
   SECTION:=utils
@@ -176,6 +172,17 @@ endef
 
 define Package/cfdisk/description
  cfdisk is a curses-based program for partitioning any hard disk drive
+endef
+
+define Package/colrm
+$(call Package/util-linux/Default)
+  TITLE:=colrm removes selected columns from a file
+  DEPENDS:=
+endef
+
+define Package/colrm/description
+ colrm removes selected columns from a file. Input is taken from
+ standard input. Output is sent to standard output.
 endef
 
 define Package/dmesg
@@ -419,6 +426,17 @@ define Package/rename/description
  expression in their name by replacement
 endef
 
+define Package/rev
+$(call Package/util-linux/Default)
+  TITLE:=Reverse lines characterwise
+endef
+
+define Package/rev/description
+ rev utility copies the specified files to the standard output, reversing the
+ order of characters in every line. If no files are specified, the standard
+ input is read.
+endef
+
 define Package/partx-utils
 $(call Package/util-linux/Default)
   TITLE:=inform kernel about the presence and numbering of on-disk partitions
@@ -478,6 +496,7 @@ endef
 define Package/taskset
 $(call Package/util-linux/Default)
   TITLE:=set or retrieve a process's CPU affinity
+  ALTERNATIVES:=200:/usr/bin/taskset:/usr/bin/util-linux-taskset
 endef
 
 define Package/taskset/description
@@ -552,44 +571,69 @@ define Package/wipefs/description
  libblkid.
 endef
 
-CONFIGURE_ARGS += \
-	--disable-use-tty-group		\
-	--disable-rpath			\
-	--disable-tls			\
-	--disable-su			\
-	--disable-sulogin		\
-	--disable-makeinstall-chown	\
-	--disable-login 		\
-	--disable-nologin		\
-	--disable-lslogins		\
-	--disable-runuser		\
-	--disable-chfn-chsh		\
-	--disable-raw			\
-	--without-python		\
-	--without-udev			\
-	--without-readline		\
-	--without-libmagic		\
-	--with-ncursesw
-
-TARGET_CFLAGS += $(FPIC) -std=gnu99
+MESON_ARGS += \
+	-Dsystemd=disabled \
+	-Dtinfo=disabled \
+	-Dcryptsetup=disabled \
+	-Dlibutil=disabled \
+	-Dlibutempter=disabled \
+	-Dlibpcre2-posix=disabled \
+	-Dlibuser=disabled \
+	-Duse-tty-group=false \
+	-Duse-tls=false \
+	-Dbuild-python=disabled \
+	-Dbuild-zramctl=disabled \
+	-Dbuild-fsck=disabled \
+	-Dbuild-wipefs=disabled \
+	-Dbuild-fallocate=disabled \
+	-Dbuild-setpriv=disabled \
+	-Dbuild-hardlink=disabled \
+	-Dbuild-cramfs=disabled \
+	-Dbuild-bfs=disabled \
+	-Dbuild-minix=disabled \
+	-Dbuild-fdformat=disabled \
+	-Dbuild-lslogins=disabled \
+	-Dbuild-wdctl=disabled \
+	-Dbuild-cal=disabled \
+	-Dbuild-switch_root=disabled \
+	-Dbuild-pivot_root=disabled \
+	-Dbuild-lsmem=disabled \
+	-Dbuild-lsirq=disabled \
+	-Dbuild-irqtop=disabled \
+	-Dbuild-chmem=disabled \
+	-Dbuild-ipcrm=disabled \
+	-Dbuild-rfkill=disabled \
+	-Dbuild-tunelp=disabled \
+	-Dbuild-kill=disabled \
+	-Dbuild-last=disabled \
+	-Dbuild-utmpdump=disabled \
+	-Dbuild-line=disabled \
+	-Dbuild-mesg=disabled \
+	-Dbuild-raw=disabled \
+	-Dbuild-vipw=disabled \
+	-Dbuild-newgrp=disabled \
+	-Dbuild-chfn-chsh=disabled \
+	-Dbuild-login=disabled \
+	-Dbuild-nologin=disabled \
+	-Dbuild-sulogin=disabled \
+	-Dbuild-su=disabled \
+	-Dbuild-runuser=disabled \
+	-Dbuild-ul=disabled \
+	-Dbuild-pg=disabled \
+	-Dbuild-write=disabled \
+	-Dbuild-bash-completion=disabled \
+	-Dbuild-pylibmount=disabled \
+	-Dreadline=disabled \
+	-Dmagic=disabled \
+	-Dncursesw=enabled
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/blkid.pc $(1)/usr/lib/pkgconfig
-	$(SED) 's,/usr/include,$$$${prefix}/include,g' $(1)/usr/lib/pkgconfig/blkid.pc
-	$(SED) 's,/usr/lib,$$$${exec_prefix}/lib,g' $(1)/usr/lib/pkgconfig/blkid.pc
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/fdisk.pc $(1)/usr/lib/pkgconfig
-	$(SED) 's,/usr/include,$$$${prefix}/include,g' $(1)/usr/lib/pkgconfig/fdisk.pc
-	$(SED) 's,/usr/lib,$$$${exec_prefix}/lib,g' $(1)/usr/lib/pkgconfig/fdisk.pc
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/mount.pc $(1)/usr/lib/pkgconfig
-	$(SED) 's,/usr/include,$$$${prefix}/include,g' $(1)/usr/lib/pkgconfig/mount.pc
-	$(SED) 's,/usr/lib,$$$${exec_prefix}/lib,g' $(1)/usr/lib/pkgconfig/mount.pc
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/smartcols.pc $(1)/usr/lib/pkgconfig
-	$(SED) 's,/usr/include,$$$${prefix}/include,g' $(1)/usr/lib/pkgconfig/smartcols.pc
-	$(SED) 's,/usr/lib,$$$${exec_prefix}/lib,g' $(1)/usr/lib/pkgconfig/smartcols.pc
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/uuid.pc $(1)/usr/lib/pkgconfig
-	$(SED) 's,/usr/include,$$$${prefix}/include,g' $(1)/usr/lib/pkgconfig/uuid.pc
-	$(SED) 's,/usr/lib,$$$${exec_prefix}/lib,g' $(1)/usr/lib/pkgconfig/uuid.pc
 
 	$(INSTALL_DIR) $(1)/usr/include/blkid
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/blkid/blkid.h $(1)/usr/include/blkid
@@ -603,43 +647,37 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/libsmartcols/libsmartcols.h $(1)/usr/include/libsmartcols
 
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libblkid.so* $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libfdisk.so* $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libmount.so* $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libuuid.so* $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libsmartcols.so* $(1)/usr/lib
-
-	$(LN) libblkid.so.1 $(1)/usr/lib/libblkid.so
-	$(LN) libfdisk.so.1 $(1)/usr/lib/libfdisk.so
-	$(LN) libmount.so.1 $(1)/usr/lib/libmount.so
-	$(LN) libuuid.so.1 $(1)/usr/lib/libuuid.so
-	$(LN) libsmartcols.so.1 $(1)/usr/lib/libsmartcols.so
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libblkid.so* $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfdisk.so* $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libmount.so* $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libuuid.so* $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsmartcols.so* $(1)/usr/lib
 endef
 
 
 define Package/libfdisk/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libfdisk.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfdisk.so.* $(1)/usr/lib/
 endef
 
 define Package/libblkid/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libblkid.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libblkid.so.* $(1)/usr/lib/
 endef
 
 define Package/libmount/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libmount.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libmount.so.* $(1)/usr/lib/
 endef
 
 define Package/libsmartcols/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libsmartcols.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsmartcols.so.* $(1)/usr/lib/
 endef
 
 define Package/libuuid/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/lib/libuuid.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libuuid.so.* $(1)/usr/lib/
 endef
 
 define Package/agetty/install
@@ -670,6 +708,11 @@ endef
 define Package/cfdisk/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/cfdisk $(1)/usr/sbin/
+endef
+
+define Package/colrm/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/colrm $(1)/usr/bin/
 endef
 
 define Package/dmesg/install
@@ -789,6 +832,11 @@ define Package/rename/install
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/rename $(1)/usr/bin/
 endef
 
+define Package/rev/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/rev $(1)/usr/bin/
+endef
+
 define Package/partx-utils/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/partx $(1)/usr/sbin/
@@ -820,7 +868,7 @@ endef
 
 define Package/taskset/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/taskset $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/taskset $(1)/usr/bin/util-linux-taskset
 endef
 
 define Package/unshare/install
@@ -866,6 +914,7 @@ $(eval $(call BuildPackage,blkid))
 $(eval $(call BuildPackage,blockdev))
 $(eval $(call BuildPackage,cal))
 $(eval $(call BuildPackage,cfdisk))
+$(eval $(call BuildPackage,colrm))
 $(eval $(call BuildPackage,dmesg))
 $(eval $(call BuildPackage,eject))
 $(eval $(call BuildPackage,fdisk))
@@ -889,6 +938,7 @@ $(eval $(call BuildPackage,namei))
 $(eval $(call BuildPackage,nsenter))
 $(eval $(call BuildPackage,prlimit))
 $(eval $(call BuildPackage,rename))
+$(eval $(call BuildPackage,rev))
 $(eval $(call BuildPackage,partx-utils))
 $(eval $(call BuildPackage,script-utils))
 $(eval $(call BuildPackage,setterm))

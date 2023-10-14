@@ -12,9 +12,9 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=https://github.com/jow-/ucode.git
-PKG_SOURCE_DATE:=2022-12-02
-PKG_SOURCE_VERSION:=46d93c9cc5da6fce581df86159bd0fc4357de41c
-PKG_MIRROR_HASH:=970a47f1bef719f056d40d17398db492bd4de92b98ef9aba4582cb18b4c9b270
+PKG_SOURCE_DATE:=2023-06-06
+PKG_SOURCE_VERSION:=c7d84aae09691a99ae3db427c0b2463732ef84f4
+PKG_MIRROR_HASH:=38826ae70d886d1d7ada3fc6591ac807169aa28107f60f7f2e617520083525fb
 PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
 PKG_LICENSE:=ISC
 
@@ -39,9 +39,10 @@ CMAKE_HOST_OPTIONS += \
 
 
 define Package/ucode/default
-  SECTION:=utils
-  CATEGORY:=Utilities
-  TITLE:=ucode - Tiny scripting and templating language
+  SUBMENU:=ucode
+  SECTION:=lang
+  CATEGORY:=Languages
+  TITLE:=Tiny scripting and templating language
 endef
 
 define Package/ucode
@@ -57,7 +58,10 @@ endef
 
 define Package/libucode
   $(Package/ucode/default)
-  TITLE+= - runtime library
+  SUBMENU:=
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE+= (library)
   ABI_VERSION:=$(PKG_ABI_VERSION)
   DEPENDS:=+libjson-c
 endef
@@ -92,7 +96,7 @@ endef
 define Package/ucode-mod-nl80211
   $(Package/ucode/default)
   TITLE+= (nl80211 module)
-  DEPENDS:=ucode +libnl-tiny
+  DEPENDS:=ucode +libnl-tiny +libubox
 endef
 
 define Package/ucode-mod-nl80211/description
@@ -114,7 +118,7 @@ endef
 define Package/ucode-mod-rtnl
   $(Package/ucode/default)
   TITLE+= (rtnl module)
-  DEPENDS:=ucode +libnl-tiny
+  DEPENDS:=ucode +libnl-tiny +libubox
 endef
 
 define Package/ucode-mod-rtnl/description
@@ -129,7 +133,7 @@ define Package/ucode-mod-struct
 endef
 
 define Package/ucode-mod-struct/description
- The struct plugin implemnts Python 3 compatible struct.pack/unpack functionality.
+ The struct plugin implements Python 3 compatible struct.pack/unpack functionality.
 endef
 
 

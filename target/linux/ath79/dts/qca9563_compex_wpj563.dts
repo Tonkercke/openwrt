@@ -99,8 +99,6 @@
 &mdio0 {
 	status = "okay";
 
-	phy-mask = <0>;
-
 	phy0: ethernet-phy@0 {
 		reg = <0>;
 		phy-mode = "sgmii";
@@ -129,6 +127,14 @@
 };
 
 &usb0 {
+	status = "okay";
+};
+
+&usb_phy1 {
+	status = "okay";
+};
+
+&usb1 {
 	status = "okay";
 };
 

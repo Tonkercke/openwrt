@@ -98,7 +98,7 @@
 				compatible = "openwrt,uimage", "denx,uimage";
 				label = "firmware";
 				openwrt,ih-magic = <0x12291000>;
-				reg = <0x50000 0x1fb0000>;
+				reg = <0x50000 0xfb0000>;
 			};
 		};
 	};
@@ -138,6 +138,21 @@
 	nvmem-cell-names = "mac-address";
 };
 
+&gmac1 {
+	status = "okay";
+	label = "wan";
+	phy-handle = <&ethphy4>;
+
+	nvmem-cells = <&macaddr_factory_e006>;
+	nvmem-cell-names = "mac-address";
+};
+
+&mdio {
+	ethphy4: ethernet-phy@4 {
+		reg = <4>;
+	};
+};
+
 &switch0 {
 	ports {
 		port@0 {
@@ -158,13 +173,6 @@
 		port@3 {
 			status = "okay";
 			label = "lan4";
-		};
-
-		port@4 {
-			status = "okay";
-			label = "wan";
-			nvmem-cells = <&macaddr_factory_e006>;
-			nvmem-cell-names = "mac-address";
 		};
 	};
 };

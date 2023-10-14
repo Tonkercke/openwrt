@@ -158,6 +158,15 @@ define Device/ubnt_powerbeam-m5-xw
 endef
 TARGET_DEVICES += ubnt_powerbeam-m5-xw
 
+define Device/ubnt_powerbridge-m
+  $(Device/ubnt-xm)
+  SOC := ar7241
+  DEVICE_MODEL := PowerBridge M
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += bullet-m
+endef
+TARGET_DEVICES += ubnt_powerbridge-m
+
 define Device/ubnt_rocket-5ac-lite
   $(Device/ubnt-xc)
   SOC := qca9558
@@ -167,8 +176,17 @@ define Device/ubnt_rocket-5ac-lite
 endef
 TARGET_DEVICES += ubnt_rocket-5ac-lite
 
+define Device/ubnt_rocket-m
+  $(Device/ubnt-xm)
+  SOC := ar7241
+  DEVICE_MODEL := Rocket M
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += rocket-m
+endef
+TARGET_DEVICES += ubnt_rocket-m
+
 define Device/ubnt_routerstation_common
-  DEVICE_PACKAGES := -kmod-ath9k -wpad-basic-wolfssl -uboot-envtools kmod-usb-ohci \
+  DEVICE_PACKAGES := -kmod-ath9k -wpad-basic-mbedtls -uboot-envtools kmod-usb-ohci \
 	kmod-usb2 fconfig
   DEVICE_VENDOR := Ubiquiti
   SOC := ar7161
@@ -211,17 +229,25 @@ define Device/ubnt_routerstation-pro
 endef
 TARGET_DEVICES += ubnt_routerstation-pro
 
-define Device/ubnt_unifi
+define Device/ubnt_unifi-ap
   $(Device/ubnt-bz)
   DEVICE_MODEL := UniFi AP
-  SUPPORTED_DEVICES += unifi
+  SUPPORTED_DEVICES += unifi ubnt,unifi
 endef
-TARGET_DEVICES += ubnt_unifi
+TARGET_DEVICES += ubnt_unifi-ap
+
+define Device/ubnt_unifi-ap-lr
+  $(Device/ubnt-bz)
+  DEVICE_MODEL := UniFi AP
+  DEVICE_VARIANT := LR
+  SUPPORTED_DEVICES += unifi ubnt,unifi ubnt,unifi-ap
+endef
+TARGET_DEVICES += ubnt_unifi-ap-lr
 
 define Device/ubnt_unifiac
   DEVICE_VENDOR := Ubiquiti
   SOC := qca9563
-  IMAGE_SIZE := 7744k
+  IMAGE_SIZE := 15488k
   DEVICE_PACKAGES := kmod-ath10k-ct ath10k-firmware-qca988x-ct
 endef
 
