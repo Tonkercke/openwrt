@@ -717,6 +717,7 @@ endef
 TARGET_DEVICES += comfast_cf-e130n-v2
 
 define Device/comfast_cf-e313ac
+  $(Device/loader-okli-uimage)
   SOC := qca9531
   DEVICE_VENDOR := COMFAST
   DEVICE_MODEL := CF-E313AC
