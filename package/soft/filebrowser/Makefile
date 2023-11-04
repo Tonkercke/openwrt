@@ -1,68 +1,69 @@
 #
-# Copyright (C) 2015-2016 OpenWrt.org
-#
+# Copyright (C) 2020 Project OpenWrt
 # This is free software, licensed under the GNU General Public License v3.
+# See /LICENSE.txt for more information.
 #
 
 include $(TOPDIR)/rules.mk
-
-PKG_ARCH_filebrowser:=$(ARCH)
 
 PKG_NAME:=filebrowser
 PKG_VERSION:=2.26.0
 PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=2953e5bc248824ea32d3131d94c452e981df7172e5bdb099490a8de6dfeaddc0
 
-ifeq ($(ARCH),x86_64)
-	PKG_ARCH:=amd64
-endif
+PKG_LICENSE:=MIT
+PKG_LICENSE_FILES:=LICENSE
+PKG_MAINTAINER:=CN_SZTL <cnsztl@project-openwrt.eu.org>
 
-ifeq ($(ARCH),aarch64)
-	PKG_ARCH:=arm64
-endif
+PKG_BUILD_DEPENDS:=golang/host
+PKG_BUILD_PARALLEL:=1
+PKG_USE_MIPS16:=0
 
-ifeq ($(ARCH),arm)
-	PKG_ARCH:=armv7
-endif
+GO_PKG:=github.com/filebrowser/filebrowser
+GO_PKG_LDFLAGS:=-s -w
+GO_PKG_LDFLAGS_X:= \
+	$(GO_PKG).build=OpenWrt \
+	$(GO_PKG).version=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
+include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
-define Package/$(PKG_NAME)
-	SECTION:=net
-	CATEGORY:=Network
-	SUBMENU:=Web Servers/Proxies
-	TITLE:=filebrowser
-	DEPENDS:=@(arm||aarch64||x86_64)
-	URL:=https://filebrowser.org/
+define Package/filebrowser
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE:=Web File Browser which can be used as a middleware or standalone app.
+  URL:=https://github.com/filebrowser/filebrowser
+  DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
-define Package/$(PKG_NAME)/description
-  File Browser is a create-your-own-cloud-kind of software where you can install it on a server
-endef
-
-define Download/$(PKG_NAME)
-  URL:=https://github.com/filebrowser/filebrowser/releases/download/v$(PKG_VERSION)
-  URL_FILE:=linux-$(PKG_ARCH)-filebrowser.tar.gz
-  FILE:=filebrowser-$(PKG_VERSION)-$(PKG_ARCH)_static.tar.gz
-  HASH:=skip
-endef
-
-define Build/Configure
+define Package/filebrowser/description
+  filebrowser provides a file managing interface within a specified directory
+  and it can be used to upload, delete, preview, rename and edit your files.
+  It allows the creation of multiple users and each user can have its own directory.
+  It can be used as a standalone app or as a middleware.
 endef
 
 define Build/Compile
-	( \
-		pushd $(PKG_BUILD_DIR) ; \
-			tar zxvf $(DL_DIR)/filebrowser-$(PKG_VERSION)-$(PKG_ARCH)_static.tar.gz -C . ; \
-		popd ; \
-	)
+( \
+  cd $(PKG_BUILD_DIR)/frontend ; \
+  npm ci; \
+  npm run lint ; \
+  npm run build ; \
+  GOOS=$$$$(go env GOOS) GOARCH=$$$$(go env GOARCH) GO111MODULE=off go get -v github.com/GeertJohan/go.rice/rice/... ; \
+  cd $(PKG_BUILD_DIR)/http ; \
+  "$$$$(go env GOPATH)/bin/rice" embed-go ; \
+  $(call GoPackage/Build/Compile) ; \
+)
 endef
 
-define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/filebrowser $(1)/usr/sbin/filebrowser
+define Package/filebrowser/install
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
+	$(INSTALL_DIR) $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/filebrowser $(1)/usr/bin/
 endef
 
-$(eval $(call Download,$(PKG_NAME)))
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call GoBinPackage,filebrowser))
+$(eval $(call BuildPackage,filebrowser))
