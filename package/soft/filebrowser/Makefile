@@ -54,7 +54,9 @@ define Build/Compile
 	)
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/filebrowser/install
+	$(call GoPackage/Package/Install/Bin,$(1))
+	
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/filebrowser $(1)/usr/sbin/filebrowser
 endef
