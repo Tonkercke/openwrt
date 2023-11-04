@@ -1,65 +1,68 @@
-# SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021 ImmortalWrt.org
+# Copyright (C) 2015-2016 OpenWrt.org
+#
+# This is free software, licensed under the GNU General Public License v3.
+#
 
 include $(TOPDIR)/rules.mk
+
+PKG_ARCH_filebrowser:=$(ARCH)
 
 PKG_NAME:=filebrowser
 PKG_VERSION:=2.26.0
 PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=2953e5bc248824ea32d3131d94c452e981df7172e5bdb099490a8de6dfeaddc0
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-PKG_LICENSE:=Apache-2.0
-PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=CN_SZTL <cnsztl@project-openwrt.eu.org>
+ifeq ($(ARCH),x86_64)
+	PKG_ARCH:=amd64
+endif
 
-PKG_BUILD_DEPENDS:=golang/host
-PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+ifeq ($(ARCH),aarch64)
+	PKG_ARCH:=arm64
+endif
 
-GO_PKG:=github.com/filebrowser/filebrowser
-GO_PKG_LDFLAGS_X:= \
-	$(GO_PKG)/v2/version.CommitSHA=$(PKG_SOURCE_VERSION) \
-	$(GO_PKG)/v2/version.Version=v$(PKG_VERSION)
+ifeq ($(ARCH),arm)
+	PKG_ARCH:=armv7
+endif
 
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
-define Package/filebrowser
-  SECTION:=utils
-  CATEGORY:=Utilities
-  TITLE:=Web File Browser
-  URL:=https://github.com/filebrowser/filebrowser
-  DEPENDS:=$(GO_ARCH_DEPENDS)
+define Package/$(PKG_NAME)
+	SECTION:=net
+	CATEGORY:=Network
+	SUBMENU:=Web Servers/Proxies
+	TITLE:=filebrowser
+	DEPENDS:=@(arm||aarch64||x86_64)
+	URL:=https://filebrowser.org/
 endef
 
-define Package/filebrowser/description
-  filebrowser provides a file managing interface within a specified directory
-  and it can be used to upload, delete, preview, rename and edit your files.
-  It allows the creation of multiple users and each user can have its own directory.
-  It can be used as a standalone app or as a middleware.
+define Package/$(PKG_NAME)/description
+  File Browser is a create-your-own-cloud-kind of software where you can install it on a server
+endef
+
+define Download/$(PKG_NAME)
+  URL:=https://github.com/filebrowser/filebrowser/releases/download/v$(PKG_VERSION)
+  URL_FILE:=linux-$(PKG_ARCH)-filebrowser.tar.gz
+  FILE:=filebrowser-$(PKG_VERSION)-$(PKG_ARCH)_static.tar.gz
+  HASH:=skip
+endef
+
+define Build/Configure
 endef
 
 define Build/Compile
 	( \
-		pushd "$(PKG_BUILD_DIR)/frontend" ; \
-		npm ci; \
-		npm run lint ; \
-		npm run build ; \
+		pushd $(PKG_BUILD_DIR) ; \
+			tar zxvf $(DL_DIR)/filebrowser-$(PKG_VERSION)-$(PKG_ARCH)_static.tar.gz -C . ; \
 		popd ; \
-		$(call GoPackage/Build/Compile) ; \
 	)
 endef
 
-define Package/filebrowser/install
-	$(call GoPackage/Package/Install/Bin,$(1))
-	
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/filebrowser $(1)/usr/sbin/filebrowser
 endef
 
-$(eval $(call GoBinPackage,filebrowser))
-$(eval $(call BuildPackage,filebrowser))
+$(eval $(call Download,$(PKG_NAME)))
+$(eval $(call BuildPackage,$(PKG_NAME)))
