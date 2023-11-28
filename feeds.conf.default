@@ -1,4 +1,4 @@
-src-git packages https://github.com/Tonkercke/packages.git
-src-git luci https://github.com/Tonkercke/luci.git
+src-git packages https://github.com/Tonkercke/packages.git;packages-22.03
+src-git luci https://github.com/Tonkercke/luci.git;luci-22.03
 src-git-full routing https://git.openwrt.org/feed/routing.git;openwrt-22.03
 src-git-full telephony https://git.openwrt.org/feed/telephony.git;openwrt-22.03
