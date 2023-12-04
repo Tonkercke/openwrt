@@ -1,0 +1,20 @@
+--- a/etc/config/firewall
++++ b/etc/config/firewall
+@@ -120,6 +120,20 @@
+	option dest_port '500'
+	option proto 'udp'
+	option target 'ACCEPT'
++
++config rule
++       option name 'Block risky ports'
++	option src 'wan'
++	option dest_port '18 20-25 69 53 110-113 123 135-139 143 161 366 389 445 456 512-514 873 1433 2049 3306 3389 5000 5432 5900-5902 6379 8000 8080 8888 27017-27018'
++	option target 'DROP'
++	option direction 'in'
++	option device 'br-lan'
++	option dest 'lan'
++	list proto 'tcp'
++	list proto 'udp'
++	list proto 'icmp'
++	list proto 'igmp'
++	list proto 'esp'
