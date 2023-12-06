@@ -16,7 +16,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  				     (((Addr[5]) & 0xff) == 0xff))
  #else
 -extern __inline int is_multicast_mac_addr(const u8 *addr)
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0) && !defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0))
 +extern
 +#endif
 +__inline int is_multicast_mac_addr(const u8 *addr)
@@ -25,7 +25,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  }
  
 -extern __inline int is_broadcast_mac_addr(const u8 *addr)
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0) && !defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0))
 +extern
 +#endif
 +__inline int is_broadcast_mac_addr(const u8 *addr)
@@ -35,7 +35,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  }
  
 -extern __inline int is_zero_mac_addr(const u8 *addr)
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0) && !defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0))
 +extern
 +#endif
 +__inline int is_zero_mac_addr(const u8 *addr)
@@ -44,21 +44,19 @@ Subject: [PATCH 3/3] fix for linux 6.1
  		(addr[3] == 0x00) && (addr[4] == 0x00) && (addr[5] == 0x00));
 --- a/os_dep/linux/ioctl_cfg80211.c
 +++ b/os_dep/linux/ioctl_cfg80211.c
-@@ -410,14 +410,29 @@ u8 rtw_cfg80211_ch_switch_notify(_adapte
+@@ -410,14 +410,27 @@ u8 rtw_cfg80211_ch_switch_notify(_adapte
  	struct wiphy *wiphy = adapter_to_wiphy(adapter);
  	u8 ret = _SUCCESS;
  
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0))
 +	// 6.3 needs an additional argcument to cfg80211_ch_switch_notify()
-+	// https://github.com/torvalds/linux/commit/b345f0637c0042f9e6b78378a32256d90f485774
++	// https://github.com/torvalds/linux/commit/457391b0380335d5e9a5babdec90ac53928b23b4
 +	struct cfg80211_chan_def chdef = {};
 +
 +	ret = rtw_chbw_to_cfg80211_chan_def(wiphy, &chdef, ch, bw, offset, ht);
 +	if (ret != _SUCCESS)
 +		goto exit;
-+
-+	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0, 0);
 +
 +#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
  	struct cfg80211_chan_def chdef = {};
@@ -67,7 +65,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  	if (ret != _SUCCESS)
  		goto exit;
  
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 +	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0);
 +#else
  	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef);
@@ -80,8 +78,8 @@ Subject: [PATCH 3/3] fix for linux 6.1
  
  		#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 -		roam_info.bssid = cur_network->network.MacAddress;
-+		#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(BUILD_OPENWRT))
-+		roam_info.links[0].bssid = cur_network->network.MacAddress;
++		#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
++		roam_info.bssid = cur_network->network.MacAddress;
 +		#endif
  		roam_info.req_ie = pmlmepriv->assoc_req + sizeof(struct rtw_ieee80211_hdr_3addr) + 2;
  		roam_info.req_ie_len = pmlmepriv->assoc_req_len - sizeof(struct rtw_ieee80211_hdr_3addr) - 2;
@@ -90,7 +88,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  }
  
  static int cfg80211_rtw_add_key(struct wiphy *wiphy, struct net_device *ndev
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +        , int link_id
 +#endif
  	, u8 key_index
@@ -100,7 +98,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  }
  
  static int cfg80211_rtw_get_key(struct wiphy *wiphy, struct net_device *ndev
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +        , int link_id
 +#endif
  	, u8 keyid
@@ -110,7 +108,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  }
  
  static int cfg80211_rtw_del_key(struct wiphy *wiphy, struct net_device *ndev,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +		                int link_id,
 +#endif
  #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 37)) || defined(COMPAT_KERNEL_RELEASE)
@@ -122,7 +120,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  static int cfg80211_rtw_set_default_key(struct wiphy *wiphy,
 -	struct net_device *ndev, u8 key_index
 +	struct net_device *ndev
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +	, int link_id
 +#endif
 +	, u8 key_index
@@ -135,7 +133,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  int cfg80211_rtw_set_default_mgmt_key(struct wiphy *wiphy,
 -	struct net_device *ndev, u8 key_index)
 +	struct net_device *ndev
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +	, int link_id
 +#endif
 +	, u8 key_index)
@@ -148,7 +146,7 @@ Subject: [PATCH 3/3] fix for linux 6.1
  
 -static int cfg80211_rtw_stop_ap(struct wiphy *wiphy, struct net_device *ndev)
 +static int cfg80211_rtw_stop_ap(struct wiphy *wiphy, struct net_device *ndev
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(BUILD_OPENWRT))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 +		, unsigned int link_id
 +#endif
 +	)
@@ -176,18 +174,13 @@ Subject: [PATCH 3/3] fix for linux 6.1
  		RTW_INFO("%s, unregister monitor interface\n", __func__);
 --- a/os_dep/linux/os_intfs.c
 +++ b/os_dep/linux/os_intfs.c
-@@ -1652,7 +1652,15 @@ int rtw_os_ndev_register(_adapter *adapt
+@@ -1652,7 +1652,10 @@ int rtw_os_ndev_register(_adapter *adapt
  	u8 rtnl_lock_needed = rtw_rtnl_lock_needed(dvobj);
  
  #ifdef CONFIG_RTW_NAPI
 -	netif_napi_add(ndev, &adapter->napi, rtw_recv_napi_poll, RTL_NAPI_WEIGHT);
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
 +	netif_napi_add_weight(ndev, &adapter->napi, rtw_recv_napi_poll, RTL_NAPI_WEIGHT);
-+#else
-+	netif_napi_add(ndev, &adapter->napi, rtw_recv_napi_poll
-+#ifndef BUILD_OPENWRT
-+		, RTL_NAPI_WEIGHT
-+#endif
 +	);
 +#endif
  #endif /* CONFIG_RTW_NAPI */
