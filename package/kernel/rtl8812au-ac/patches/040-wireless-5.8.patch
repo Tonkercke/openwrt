@@ -78,9 +78,9 @@
  
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2))
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2) || defined(BUILD_OPENWRT))
- static int cfg80211_rtw_stop_ap(struct wiphy *wiphy, struct net_device *ndev, unsigned int link_id)
- #else
  static int cfg80211_rtw_stop_ap(struct wiphy *wiphy, struct net_device *ndev)
+ #else
+ static int cfg80211_rtw_stop_ap(struct wiphy *wiphy, struct net_device *ndev, unsigned int link_id)
 @@ -6184,7 +6184,7 @@ static int	cfg80211_rtw_set_channel(stru
  	return 0;
  }
@@ -117,7 +117,7 @@
  #endif
  #endif /* CONFIG_RTW_NAPI */
  
-@@ -2793,7 +2796,13 @@ static int netdev_vir_if_close(struct ne
+@@ -2793,7 +2797,13 @@ static int netdev_vir_if_close(struct ne
  
  #ifdef CONFIG_IOCTL_CFG80211
  	wdev->iftype = NL80211_IFTYPE_MONITOR;
