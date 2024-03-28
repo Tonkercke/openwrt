@@ -54,7 +54,7 @@
  
  #include <pinmux.h>
  
-@@ -105,11 +110,93 @@ static struct rt2880_pmx_group mt7621_pi
+@@ -105,11 +110,89 @@ static struct rt2880_pmx_group mt7621_pi
  	{ 0 }
  };
  
@@ -90,7 +90,7 @@
 +{
 +	u32 syscfg, xtal_sel, clkcfg, clk_sel, curclk, ffiv, ffrac;
 +	u32 pll, prediv, fbdiv;
-+	u32 xtal_clk, cpu_clk, bus_clk,i;
++	u32 xtal_clk, cpu_clk, bus_clk;
 +	const static u32 prediv_tbl[] = {0, 1, 2, 2};
 +
 +	syscfg = rt_sysc_r32(SYSC_REG_SYSTEM_CONFIG0);
@@ -116,10 +116,6 @@
 +		break;
 +	case 1:
 +		pll = rt_memc_r32(MEMC_REG_CPU_PLL);
-+		pll &= ~(0x7ff);
-+		pll |=  (0x362);
-+		rt_memc_w32(pll,MEMC_REG_CPU_PLL);
-+		for(i=0;i<1024;i++);
 +		fbdiv = (pll >> CPU_PLL_FBDIV_SHIFT) & CPU_PLL_FBDIV_MASK;
 +		prediv = (pll >> CPU_PLL_PREDIV_SHIFT) & CPU_PLL_PREDIV_MASK;
 +		cpu_clk = ((fbdiv + 1) * xtal_clk) >> prediv_tbl[prediv];
